@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<head>
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var herfstr = window.location.href;
+            var rstr = herfstr.substring(44,herfstr.length-1);
+            var json = {
+                rstr : rstr
+            }
+            $.ajax({
+                type:"POST",
+                url:"http://172.16.32.1:8000/user/verify/",
+                contentType:"application/json;charset=utf-8",
+                data:JSON.stringify(json),
+                dataType:"json",
+                success:function(res){
+                    if(res.msg=="true"){
+                        alert("注册成功")
+                    }else{
+                        alert("注册失败")
+                    }
+                },
+                error:function(err){
+                    alert("注册失败")
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+</body>
