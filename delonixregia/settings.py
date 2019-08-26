@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'secondhandtrade.apps.SecondhandtradeConfig',
     'recruit.apps.RecruitConfig',
     'corsheaders'
-
 ]
 
 MIDDLEWARE = [
@@ -78,9 +77,10 @@ TEMPLATES = [
 WSGI_APPLICATION = 'delonixregia.wsgi.application'
 
 ALLOWED_HOSTS=['172.16.32.1']
+
+#数据库设置
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-
 #DATABASES = {
 #    'default': {
 #    'ENGINE': 'django.db.backends.mysql',
@@ -93,6 +93,7 @@ ALLOWED_HOSTS=['172.16.32.1']
 #    }
 #}
 
+#默认使用SQlite
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -136,7 +137,6 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
 
@@ -155,9 +155,9 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 #解决跨域问题 cors
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = (
-    'localhost:8080',
-)
+# CORS_ORIGIN_WHITELIST = (
+#     'localhost:8080',
+# )
 CORS_ALLOW_METHODS = (
     'DELETE',
     'GET',

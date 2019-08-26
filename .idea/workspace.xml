@@ -1,27 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8e8ee5e5-3c93-4ccb-80cd-601410d0ef87" name="Default" comment="【尝试使用Pycharm链接git】" />
+    <list default="true" id="8e8ee5e5-3c93-4ccb-80cd-601410d0ef87" name="Default" comment="【尝试使用Pycharm链接git】">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/delonixregia/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/delonixregia/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/delonixregia/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/delonixregia/urls.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
-  </component>
-  <component name="FindInProjectRecents">
-    <findStrings>
-      <find>user_profile</find>
-      <find>allo</find>
-      <find>find</find>
-      <find>log_o</find>
-      <find>url</find>
-      <find>SESSION_COOKIE_NAME</find>
-      <find>cache</find>
-      <find>insti</find>
-      <find>living_ci</find>
-      <find>req</find>
-      <find>static</find>
-    </findStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -187,7 +176,30 @@
       <option name="presentableId" value="Default" />
       <updated>1548514058881</updated>
     </task>
+    <task id="LOCAL-00001" summary="【尝试使用Pycharm链接git】">
+      <created>1566809943064</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1566809943064</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="【尝试使用Pycharm链接git】" />
+    <option name="LAST_COMMIT_MESSAGE" value="【尝试使用Pycharm链接git】" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

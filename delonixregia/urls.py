@@ -27,6 +27,4 @@ urlpatterns = [
     path('recruit/',include('recruit.urls')),
     #测试
     path('map',TemplateView.as_view(template_name="test.html"))
-
-
 ]
