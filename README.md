@@ -8,5 +8,9 @@ For backend
 ```
 pip install django-cors-headers
 ```
+
 2.SimpleJson的安装，方便JSON数据的转化
-``
+
+```
+pip install simplejson
+```
