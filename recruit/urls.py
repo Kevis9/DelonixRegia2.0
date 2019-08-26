@@ -14,5 +14,4 @@ urlpatterns=[
     path("getpostcomments/",views.getpostcomment,name="getpostcomment"),
     #点赞
     path("add_likecount/",views.add_likecount),
-
 ]

@@ -76,7 +76,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'delonixregia.wsgi.application'
 
-ALLOWED_HOSTS=['172.16.32.1']
+ALLOWED_HOSTS=['*']
 
 #数据库设置
 # Database

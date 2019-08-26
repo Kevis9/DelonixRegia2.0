@@ -82,7 +82,6 @@ def getpost(request):
            postins["title"]=post.title
            postins["companylink"]=post.companylink
            #获取发布者的昵称
-
            user=User.objects.get(id=post.user.id)
            stu_profile = list(user_profile_stu.objects.filter(user=user))
            c_profile = list(user_profile_company.objects.filter(user=user))
