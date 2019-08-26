@@ -108,7 +108,6 @@ class user_profile_graduate(models.Model):
         return "{}".format(self.user)
 
     def get_absolute_url(self):
-
         return reverse('get_profile_graduate', args=[self.user.id])
         #但是推荐用上面的
 

@@ -17,6 +17,9 @@ from django.core.cache import cache
 from django.views.decorators.cache import cache_page
 from django.contrib.auth.hashers import check_password,make_password
 import random
+from django.forms.models import model_to_dict
+localurl="http://172.16.67.134:8000"
+
 
 #生成随机字符串
 def get_random_str():
@@ -76,7 +79,7 @@ def register(request):
         #发送邮件
         #生成随机字符串
         random_str=get_random_str()
-        url = "http://172.16.32.1:8000/delonixregia/verify/"+random_str+"/"
+        url = localurl+"/delonixregia/verify/"+random_str+"/"
         subject="激活邮件"
         content="点击下方进行激活"
         recipient_emial=[email]
@@ -116,8 +119,7 @@ def active(request):
             return JsonResponse(response)
 
 
-
-#更改密码
+#找回密码
 @csrf_exempt
 @require_http_methods(["POST"])
 def findpas(request):
@@ -155,7 +157,7 @@ def verifyandsetpas(request):
         email=cache.get(req["random_str"])
         if email:
             user=User.objects.get(email=email)
-            user.password=req["newpassword"]
+            user.set_password(req["newpassword"])
             user.save()
         else:
             response["msg"]="false"
@@ -175,7 +177,8 @@ def changepas(request):
         try:
             user = User.objects.get(username=username)
             if check_password(oldpassword,user.password):
-                user.password=newpassword
+                #修改密码的函数
+                user.set_password(newpassword)
                 user.save()
             else:
                 response["msg"]="false"
@@ -184,7 +187,6 @@ def changepas(request):
         return JsonResponse(response)
 
 @csrf_exempt
-
 #登陆
 def log_in(request):
     # 设置响应
@@ -205,6 +207,7 @@ def log_in(request):
                 cache.set(request.session.session_key,{"username":username,"is_login":True},None)
             else:
                 msg = "密码错误"
+                return JsonResponse({"msg":msg})
             userstuprofile=list(user_profile_stu.objects.filter(user=user))
             usergraduateprofile=list(user_profile_graduate.objects.filter(user=user))
             usergraduatecompany = list(user_profile_company.objects.filter(user=user))
@@ -226,14 +229,19 @@ def log_in(request):
     get_token(request)  # 产生一个token 用于csrf验证
     return response
 
+@csrf_exempt
 #登出
 def log_out(request):
     response={"msg":"true"}
     # del request.session["sessionid"]
     #删除cache中的配置
-    cache.delete(simplejson.loads(request).get("sessionid"))
-
-    return response
+    try:
+        sessionid=simplejson.loads(request.body)["sessionid"]
+        cache.delete(sessionid)
+    except Exception as e:
+        print(e)
+        response["msg"]="false"
+    return JsonResponse(response)
 
 @csrf_exempt
 #获取个人信息
@@ -259,93 +267,21 @@ def get_profile(request):
         if identity=='1':
             try:
                 userprofile = user_profile_graduate.objects.get(user=user)
-                response["phonenumber"]=userprofile.phonenumber
-                response["living_province"]=userprofile.living_city
-                response["school"]=userprofile.university
-                response["name"] = userprofile.name
-                response["gender"] = userprofile.gender
-                response["age"]=userprofile.age
-                response["major"] = userprofile.major
-                response["email"]=userprofile.email
-                response["birth_data"]=userprofile.birth_data
-                response["education_backgroud"] = userprofile.education_backgroud
-                response["living_city"]=userprofile.living_city
-                response["school_period_start"]=userprofile.school_period_start
-                response["school_period_end"]=userprofile.school_period_end
-                response["honour"]=userprofile.honour
-                response["self_judement"]=userprofile.self_judement
-                response["user_id"] = user.id
-                response["identity"]=userprofile.identity
+                #模型转为字典
+                response=model_to_dict(userprofile)
                 response["msg"]=msg
                 #工作经历的获取
-                response["jobexperience"]=list(jobexperience.objects.filter(user=user))
+                joblist=list(jobexperience.objects.filter(user=user))
+                response["jobexperience"]=[]
+                for job in joblist:
+                    response["jobexperience"].append(model_to_dict(job))
+                print(response["jobexperience"])
                 # 头像获取
                 img = imageprofile.objects.filter(user=user)[0]
                 response["imgurl"] = img.imgurl
                 return JsonResponse(response)
             except Exception as e:
-                return JsonResponse(response)
-        #在校生
-        if identity=='2':
-            try:
-                userprofile = user_profile_stu.objects.get(user=user)
-                response["phonenumber"]=userprofile.phonenumber
-                response["name"] = userprofile.name
-                response["gender"] = userprofile.gender
-                response["age"]=userprofile.age
-                response["major"] = userprofile.major
-                response["email"]=userprofile.email
-                response["birth_data"]=userprofile.birth_data
-                response["user_id"] = user.id
-                response["identity"]=userprofile.identity
-                response["institution"]=userprofile.institution
-                response["self_judgement"] = userprofile.self_judgement
-                response["self_sign"] = userprofile.self_sign
-                response["living_city"] = userprofile.living_city
-                response["living_province"]=userprofile.living_province
-                response["university"] = userprofile.university
-                response["msg"]=msg
-
-                # 头像获取
-                img=imageprofile.objects.filter(user=user)[0]
-                response["imgurl"] = img.imgurl
-                # 教育经历获取
-                e_education=list(educationexperice.objects.filter(user=user))
-                educations={}
-                i=1
-                for education in e_education:
-                    strn = "education" + str(i)
-                    edu = {}
-                    edu["startime"]=education.startime
-                    edu["endtime"]=education.endtime
-                    edu["school"]=education.school
-                    edu["major"]=education.major
-                    edu["educationbackground"]=education.educationbackground
-                    edu["edu_id"]=education.id
-                    educations[strn]=edu
-                    i=i+1
-                response["edu_e"]=educations
-                # 工作经历
-                j_experience=list(jobexperience.objects.filter(user=user))
-                jobs={}
-                i = 1
-                for j in j_experience:
-                    strn = "job" + str(i)
-                    job = {}
-                    job["job_place"] = j.job_place
-                    job["job"] = j.job
-                    job["job_period_start"] = j.job_period_start
-                    job["job_period_end"] = j.job_period_end
-                    job["job_city"] = j.job_city
-                    job["job_salary"] = j.job_salary
-                    job["job_id"]=j.id
-                    job["job_province"]=j.job_province
-                    jobs[strn] = job
-                    i=i+1
-                response["job_e"]=jobs
-                return JsonResponse(response)
-            except Exception as e:
-                return JsonResponse(response)
+                return JsonResponse({"msg":"false"})
         #企业
         if identity=='3':
             try:
@@ -385,7 +321,7 @@ def update_profile(request):
         # username = request.session.get("username", None)
         # is_login = request.session.get("is_login", False)
         # identity = simplejson.loads(request.body).get("identity", None)
-        #获取用户
+        #block代表不同的区域
         block=req["block"]
         user = User.objects.get(username=username)
         if is_login:
@@ -394,14 +330,16 @@ def update_profile(request):
                 try:
                     userprofile = user_profile_graduate.objects.get(user=user)
                     if block=="0":
-                        userprofile.name = req["name"]
+                        # userprofile.update(**req)
+                        userprofile.name=req["name"]
                         userprofile.gender = req["gender"]
-                        # 头像
+                        #头像
                         image=imageprofile.objects.get(user=user)
                         image.imgurl = req["imgurl"]
                         image.save()
-
                     if block=="1":
+                        # 因为字典的内容和model可能对不上，故不用此函数
+                        # userprofile.update(**req)
                         userprofile.age = req["age"]
                         userprofile.birth_data = req["birth_data"]
                         userprofile.major = req["major"]
@@ -416,6 +354,7 @@ def update_profile(request):
                     if block=="2":
                         if req["add"]=="1":
                             education_e = educationexperice(user=user)
+                            education_e.update(**req)
                             education_e.major = req["major"]
                             education_e.school = req["school"]
                             education_e.startime = req["startime"]
@@ -427,8 +366,8 @@ def update_profile(request):
                             education_e.delete()
                     if block=="3":
                         if req["add"]=="1":
-
                             jobe = jobexperience(user=user)
+                            # jobe.update(**req)
                             jobe.job_place = req["job_place"]
                             jobe.job = req["job"]
                             jobe.job_period_start = req["job_period_start"]
@@ -446,76 +385,7 @@ def update_profile(request):
                         userprofile.self_sign = req["self_sign"]
                     userprofile.save()
                 except Exception as e:
-                    response["msg"]=e
-                return JsonResponse(response)
-            #在校生
-            if identity == '2':
-                try:
-                    userprofile = user_profile_stu.objects.get(user=user)
-                    if block == "0":
-                        userprofile.name = req["name"]
-                        userprofile.gender = req["gender"]
-                        # 头像
-                        image = imageprofile.objects.get(user=user)
-                        image.imgurl = req["imgurl"]
-                        image.save()
-                    if block=="1":
-                        print(userprofile)
-                        userprofile.age = req["age"]
-                        userprofile.birth_data = req["birth_data"]
-                        userprofile.major = req["major"]
-                        userprofile.education_background = req["education_background"]
-                        userprofile.university = req["university"]
-                        userprofile.living_city = req["living_city"]
-                        userprofile.living_province = req["living_province"]
-                        userprofile.email = req["email"]
-                        userprofile.phonenumber = req["phonenumber"]
-                        userprofile.school_period_start = req["school_period_start"]
-                        userprofile.school_period_end = req["school_period_end"]
-                    if block=="2":
-                        # 教育经历
-                        if req["add"]=="1":
-                            education_e = educationexperice(user=user)
-                            print(user)
-                            education_e.major = req["major"]
-                            print(education_e.major)
-                            education_e.school = req["school"]
-                            print(education_e.school)
-                            education_e.startime = req["startime"]
-                            print(education_e.startime)
-                            education_e.endtime = req["endtime"]
-                            print(education_e.endtime)
-                            education_e.educationbackground = req["educationbackground"]
-                            print(education_e.educationbackground)
-                            education_e.save()
-                        else:
-                            education_e=educationexperice.objects.get(id=req["edu_id"])
-                            education_e.delete()
-                    if block=="3":
-                        if req["add"]=="1":
-                            jobe = jobexperience(user=user)
-                            jobe.job_place = req["job_place"]
-                            jobe.job = req["job"]
-                            jobe.job_period_start = req["job_period_start"]
-                            jobe.job_period_end = req["job_period_end"]
-                            jobe.job_salary = req["job_salary"]
-                            jobe.job_city = req["job_city"]
-                            jobe.job_province = req["job_province"]
-                            jobe.save()
-                        #删除工作经历
-                        else:
-                            jobe=jobexperience.objects.get(id=req["job_id"])
-                            print(req["job_id"])
-                            jobe.delete()
-                    if block=="4":
-                        print(req["self_judgement"])
-                        print(req["self_sign"])
-                        userprofile.self_judgement = req["self_judgement"]
-                        userprofile.self_sign = req["self_sign"]
-                    userprofile.save()
-                    response["msg"]="true"
-                except Exception as e:
-                    response['msg']=e
+                    response["msg"]="false"
                 return JsonResponse(response)
             #企业
             if identity == '3':
@@ -535,6 +405,7 @@ def update_profile(request):
                 return JsonResponse(response)
     get_token(request)
     return JsonResponse(response)
+
 
 @csrf_exempt
 #添加好友

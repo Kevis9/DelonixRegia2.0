@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8e8ee5e5-3c93-4ccb-80cd-601410d0ef87" name="Default" comment="【修改部分bug--服务器运行问题】">
+    <list default="true" id="8e8ee5e5-3c93-4ccb-80cd-601410d0ef87" name="Default" comment="【修改settings】">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/delonixregia/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/delonixregia/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recruit/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/recruit/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recruit/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/recruit/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recruit/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/recruit/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/templates/active.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/templates/test.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/templates/verify.html" beforeDir="false" afterPath="$PROJECT_DIR$/user/templates/verify.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/views.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -154,7 +156,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/manage.py" />
-      <option name="PARAMETERS" value="runserver 0.0.0.0:8000" />
+      <option name="PARAMETERS" value="runserver 172.16.67.134:8000" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -205,7 +207,14 @@
       <option name="project" value="LOCAL" />
       <updated>1566811494623</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="【修改settings】">
+      <created>1566821957852</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1566821957853</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -222,7 +231,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="【尝试使用Pycharm链接git】" />
     <MESSAGE value="【修改部分bug--服务器运行问题】" />
-    <option name="LAST_COMMIT_MESSAGE" value="【修改部分bug--服务器运行问题】" />
+    <MESSAGE value="【修改settings】" />
+    <option name="LAST_COMMIT_MESSAGE" value="【修改settings】" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -236,11 +246,6 @@
           <url>file://$PROJECT_DIR$/friendcircle/views.py</url>
           <line>29</line>
           <option name="timeStamp" value="184" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/user/views.py</url>
-          <line>240</line>
-          <option name="timeStamp" value="193" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
