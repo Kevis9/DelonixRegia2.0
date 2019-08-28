@@ -1,21 +1,21 @@
 from django.contrib import admin
 
 from django.contrib import admin
-from .models import jobexperience,\
-    user_profile_graduate,\
-    user_profile_stu,\
-    user_profile_company,\
-    imageprofile,\
-    educationexperice,\
-    friends
+from .models import JobExperience,\
+    User_Profile_Graduate,\
+    User_Profile_Stu,\
+    User_Profile_Company,\
+    EducationExperience,\
+    Friends,Message
 
 
 # Register your models here.
-admin.site.register(jobexperience)
-admin.site.register(user_profile_graduate)
-admin.site.register(user_profile_stu)
-admin.site.register(user_profile_company)
-admin.site.register(imageprofile)
-admin.site.register(educationexperice)
-admin.site.register(friends)
+admin.site.register(JobExperience)
+admin.site.register(User_Profile_Graduate)
+admin.site.register(User_Profile_Stu)
+admin.site.register(User_Profile_Company)
+admin.site.register(EducationExperience)
+admin.site.register(Friends)
+admin.site.register(Message)
+
 

@@ -5,13 +5,13 @@
     <script>
         $(document).ready(function () {
             var herfstr = window.location.href;
-            var rstr = herfstr.substring(46,herfstr.length-1);
+            var rstr = herfstr.substring(herfstr.length-5,herfstr.length-1);
             var json = {
                 rstr : rstr
             }
             $.ajax({
                 type:"POST",
-                url:"http://172.16.67.134:8000/user/verify/",
+                url:"http://172.16.3.61:8000/user/verify/",
                 contentType:"application/json;charset=utf-8",
                 data:JSON.stringify(json),
                 dataType:"json",

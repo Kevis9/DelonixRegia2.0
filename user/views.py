@@ -1,10 +1,10 @@
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
 from django.http import JsonResponse,HttpResponse
-from .models import user_profile_stu,\
-    user_profile_graduate,\
-    user_profile_company,jobexperience,imageprofile,\
-    educationexperice,friends
+from .models import User_Profile_Stu,\
+    User_Profile_Graduate,\
+    User_Profile_Company,JobExperience,\
+    EducationExperience,Friends,Message
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token ,rotate_token
 from django.core.mail import send_mail,send_mass_mail,EmailMultiAlternatives
@@ -18,7 +18,8 @@ from django.views.decorators.cache import cache_page
 from django.contrib.auth.hashers import check_password,make_password
 import random
 from django.forms.models import model_to_dict
-localurl="http://172.16.67.134:8000"
+from django.db.models import Q
+localurl="http://172.16.3.61:8000"
 
 
 #生成随机字符串
@@ -58,22 +59,17 @@ def register(request):
             # 保存到数据库
             # 设置用户的身份
             if identity=="1":
-                profile=user_profile_graduate(user=user)
-                profile.identity=identity
-                profile.save()
+                profile=User_Profile_Graduate(user=user)
             if identity=="2":
-                profile = user_profile_stu(user=user)
-                profile.identity = identity
-                profile.save()
+                profile = User_Profile_Stu(user=user)
             if identity=="3":
-                profile = user_profile_company(user=user)
-                profile.identity = identity
-                profile.save()
-            img=imageprofile(user=user,imgurl=None)
-            img.save()
-            job=jobexperience(user=user)
+                profile = User_Profile_Company(user=user)
+            profile.identity = identity
+            profile.email = email
+            profile.save()
+            job=JobExperience(user=user)
             job.save()
-            e=educationexperice(user=user)
+            e=EducationExperience(user=user)
             e.save()
         #如果用户已存在但是不是有效的,那么直接对这个用户发送邮件
         #发送邮件
@@ -95,6 +91,7 @@ def register(request):
             response["msg"]="f_send" #发送失败
             return JsonResponse(response)
         return JsonResponse(response)
+
 #激活用户
 @csrf_exempt
 @require_http_methods(["POST"])#限制请求方法
@@ -208,9 +205,9 @@ def log_in(request):
             else:
                 msg = "密码错误"
                 return JsonResponse({"msg":msg})
-            userstuprofile=list(user_profile_stu.objects.filter(user=user))
-            usergraduateprofile=list(user_profile_graduate.objects.filter(user=user))
-            usergraduatecompany = list(user_profile_company.objects.filter(user=user))
+            userstuprofile=list(User_Profile_Stu.objects.filter(user=user))
+            usergraduateprofile=list(User_Profile_Graduate.objects.filter(user=user))
+            usergraduatecompany = list(User_Profile_Company.objects.filter(user=user))
             if len(userstuprofile)>0:
                 response["identity"]=userstuprofile[0].identity
             if len(usergraduateprofile)>0:
@@ -266,35 +263,33 @@ def get_profile(request):
         #毕业生
         if identity=='1':
             try:
-                userprofile = user_profile_graduate.objects.get(user=user)
+                userprofile = User_Profile_Graduate.objects.get(user=user)
                 #模型转为字典
                 response=model_to_dict(userprofile)
                 response["msg"]=msg
                 #工作经历的获取
-                joblist=list(jobexperience.objects.filter(user=user))
+                joblist=list(JobExperience.objects.filter(user=user))
                 response["jobexperience"]=[]
                 for job in joblist:
                     response["jobexperience"].append(model_to_dict(job))
                 print(response["jobexperience"])
                 # 头像获取
-                img = imageprofile.objects.filter(user=user)[0]
-                response["imgurl"] = img.imgurl
+                response["imgurl"] = userprofile.imgurl
                 return JsonResponse(response)
             except Exception as e:
                 return JsonResponse({"msg":"false"})
         #企业
         if identity=='3':
             try:
-                userprofile = user_profile_company.objects.get(user=user)
-                response["name"] = user_profile_company.name
-                response["email"]=user_profile_company.email
-                response["honour"]=user_profile_company.honour
-                response["identity"]=user_profile_company.identity
+                userprofile = User_Profile_Company.objects.get(user=user)
+                response["name"] = User_Profile_Company.name
+                response["email"]=User_Profile_Company.email
+                response["honour"]=User_Profile_Company.honour
+                response["identity"]=User_Profile_Company.identity
                 response["user_id"] = user.id
                 response["msg"]=msg
                 # 头像获取
-                img = imageprofile.objects.filter(user=user)[0]
-                response["imgurl"] = img.imgurl
+                response["imgurl"] = userprofile.imgurl
                 return JsonResponse(response)
             except Exception as e:
                 response["msg"]=e
@@ -328,15 +323,13 @@ def update_profile(request):
             #毕业生
             if identity == '1':
                 try:
-                    userprofile = user_profile_graduate.objects.get(user=user)
+                    userprofile = User_Profile_Graduate.objects.get(user=user)
                     if block=="0":
                         # userprofile.update(**req)
                         userprofile.name=req["name"]
                         userprofile.gender = req["gender"]
                         #头像
-                        image=imageprofile.objects.get(user=user)
-                        image.imgurl = req["imgurl"]
-                        image.save()
+                        userprofile.imgurl=req["imgurl"]
                     if block=="1":
                         # 因为字典的内容和model可能对不上，故不用此函数
                         # userprofile.update(**req)
@@ -353,7 +346,7 @@ def update_profile(request):
                         userprofile.school_period_end = req["school_period_end"]
                     if block=="2":
                         if req["add"]=="1":
-                            education_e = educationexperice(user=user)
+                            education_e = EducationExperience(user=user)
                             education_e.update(**req)
                             education_e.major = req["major"]
                             education_e.school = req["school"]
@@ -362,11 +355,11 @@ def update_profile(request):
                             education_e.educationbackground = req["educationbackground"]
                             education_e.save()
                         else:
-                            education_e=educationexperice.objects.get(id=req["edu_id"])
+                            education_e=EducationExperience.objects.get(id=req["edu_id"])
                             education_e.delete()
                     if block=="3":
                         if req["add"]=="1":
-                            jobe = jobexperience(user=user)
+                            jobe = JobExperience(user=user)
                             # jobe.update(**req)
                             jobe.job_place = req["job_place"]
                             jobe.job = req["job"]
@@ -378,7 +371,7 @@ def update_profile(request):
                             jobe.save()
                         #删除工作经历
                         else:
-                            jobe=jobexperience.objects.get(id=req["job_id"])
+                            jobe=JobExperience.objects.get(id=req["job_id"])
                             jobe.delete()
                     if block=="4":
                         userprofile.self_judement = req["self_judement"]
@@ -390,14 +383,12 @@ def update_profile(request):
             #企业
             if identity == '3':
                 try:
-                    userprofile = user_profile_company.objects.get(user=user)
+                    userprofile = User_Profile_Company.objects.get(user=user)
                     userprofile.phonenumber=req["phonenumber"]
                     userprofile.name=req["name"]
                     userprofile.email=req["email"]
                     # 头像
-                    image = imageprofile(user=user)
-                    image.imgurl = req["imgurl"]
-                    image.save()
+                    userprofile.imgurl=req["imgurl"]
                     userprofile.save()
                     response["msg"]="true"
                 except Exception as e:
@@ -406,211 +397,205 @@ def update_profile(request):
     get_token(request)
     return JsonResponse(response)
 
-
 @csrf_exempt
-#添加好友
-def addfriend(request):
+#关注某人
+def follw(request):
     response={}
     if request.method=="POST":
         req=simplejson.loads(request.body)
         sessionid=req["sessionid"]
+        #被关注人的id
         fid=req["fid"]
         dic=cache.get(sessionid)
         response["msg"]="true"
         if dic is None:
             return JsonResponse({"msg":"expire"})
+        #申请者username
         username=dic["username"]
         is_login=dic["is_login"]
         if is_login:
             try:
+                #朋友的id拿到user
                 fuser=User.objects.get(id=fid)
+                #拿到申请者user
                 user=User.objects.get(username=username)
-                friend=friends(user=fuser)
-                friend.whosfriend=user
+                tmp=list(Friends.objects.filter(user=fuser))
+                if(len(tmp)==0):
+                    #friend=Friends(user=fuser) 这样写应该只是在内存中创建，不再表中创建
+                    friend=Friends.objects.create(user=fuser)
+                    print(friend.id)
+                else:
+                    friend=tmp[0]
+                friend.followedby.add(user)
                 friend.save()
+                message=Message(text=req["text"],msgfrom=user,msgto=fuser,headline=req["headline"])
+                message.save()
             except Exception as e:
-                response["msg"]=e
+                response["msg"]="false"
+                print(e)
             return JsonResponse(response)
         else:
             response["msg"]="false"
             return JsonResponse(response)
-    return JsonResponse({"msg":"wrongmethod"})
+    return JsonResponse({"msg":"WM"})
 
 @csrf_exempt
-#选择是否接受好友
-def acceptfriend(requst):
-    response={}
-    response["msg"]="true"
-    if requst.method=="POST":
-        req=simplejson.loads(requst.body)
-        sessionid=req["sessionid"]
-        whosfriend=User.objects.get(id=req["fid"])
-        dic=cache.get(sessionid)
-        if dic is None:
-            return JsonResponse({"msg":"expire"})
-        is_login=dic["is_login"]
-        username=dic["username"]
-
-        is_acc=req["is_ac"]
-        if is_login:
-            if is_acc=="1":
-                try:
-                    user=User.objects.get(username=username)
-                    friendship=list(friends.objects.filter(user=user,whosfriend=whosfriend))
-                    if len(friendship)>0:
-                        friendship[0].is_friend=True
-                        friendship[0].save()
-                    else:
-                        response["msg"]="no such message"
-                except Exception as e:
-                    response["msg"]=e
-            else:
-                user = User.objects.get(username=username)
-                friendship = list(friends.objects.filter(user=user, whosfriend=whosfriend))
-                if len(friendship) > 0:
-                    friendship[0].delete()
-                else:
-                    response["msg"] = "no such message"
-            return JsonResponse(response)
-        else:
-            return JsonResponse({"msg":"false"})
-    return JsonResponse({"msg":"wrongmethod"})
-
-@csrf_exempt
-#展示好友列表
-def showfriends(requst):
+#展示我关注的人
+def showmyfollows(request):
     response = {}
     response["msg"] = "true"
-    req = simplejson.loads(requst.body)
+    req = simplejson.loads(request.body)
     sessionid = req["sessionid"]
     dic = cache.get(sessionid)
     if dic is None:
         return JsonResponse({"msg": "expire"})
     is_login = dic["is_login"]
     username = dic["username"]
-
     if is_login:
-       user=User.objects.get(username=username)
-       fs=list(friends.objects.filter(whosfriend=user))
-       #获取所有的朋友列表
-       isf={}
-       notf={}
-       whosendmemessage={}
-       #循环时会用到
-       i=1
-       j=1
-       k=1
-       for f in fs:
-           if f.is_friend:
-               strn = "f1" + str(i)
-               dicn = {}
-               user = f.user
-               print(user)
-               dicn["fname"] = user.username
-               dicn["fid"] = user.id
-               img = list(imageprofile.objects.filter(user=user))
-               profile_s = list(user_profile_stu.objects.filter(user=user))
-               profile_g = list(user_profile_graduate.objects.filter(user=user))
-               if len(profile_g) > 0:
-                   dicn["fself_sign"] = profile_g[0].self_sign
-               if len(profile_s) > 0:
-                   dicn["fself_sign"] = profile_s[0].self_sign
-               if len(profile_g) < 0 and len(profile_s) < 0:
-                   dicn["fself_sign"] = ""
-               if len(img)>0:
-                   dicn["fimgurl"] = img[0].imgurl
-               else:
-                   response["fimgurl"] =""
-               isf[strn] = dicn
-               i = i + 1
-           else:
-               strn = "nf" + str(j)
-               dicn = {}
-               user = f.user
-               dicn["fname"] = user.username
-               dicn["fid"] = user.id
-               img = list(imageprofile.objects.filter(user=user))
-               profile_s = list(user_profile_stu.objects.filter(user=user))
-               profile_g = list(user_profile_graduate.objects.filter(user=user))
-               if len(profile_g) > 0:
-                   dicn["fself_sign"] = profile_g[0]. self_sign
-               if len(profile_s) > 0:
-                   dicn["fself_sign"] = profile_s[0].self_sign
-               if len(profile_g) < 0 and len(profile_s) < 0:
-                   dicn["fself_sign"] = ""
-               if len(img)>0:
-                   dicn["fimurl"] = img[0].imgurl
-               else:
-                   dicn ["fimurl"] =""
-               isf[strn] = dicn
-               i = i + 1
-               notf[strn] = dicn
-       print(username)
-       user=User.objects.get(username=username)
-       message=list(friends.objects.filter(user=user,is_friend=False))
-       for u in message:
-           strn="m"+str(k)
-           dicn = {}
-           user=User.objects.get(id=u.whosfriend.id)
-           print(user)
-           dicn["fname"]=user.username
-           dicn["fid"]=user.id
-           img = list(imageprofile.objects.filter(user=user))
-           if len(img)>0:
-               dicn["imgurl"] = img[0].imgurl
-           else:dicn["imgurl"]=""
-           whosendmemessage[strn]=dicn
-           k=k+1
-
-       response["whosendmemessage"]=whosendmemessage
-       response["friends"] = isf
-       response["nfriends"] = notf
-       response["msg"]="true"
-       return JsonResponse(response)
+        user = User.objects.get(username=username)
+        # 获得该用户的所有关注的人
+        try:
+            concerns = list(user.follwedby.all())
+        except Exception as e:
+            concerns=None
+        # 将关注的人的头像，姓名和id返回
+        response["follows"] = []
+        for f in concerns:
+            profile1=list(User_Profile_Graduate.objects.filter(user=f.user))
+            profile2 =list(User_Profile_Company.objects.filter(user=f.user))
+            dic={}
+            if(len(profile1)>0):
+                dic["imgurl"] = profile1[0].imgurl
+                dic["name"] = profile1[0].name
+            if(len(profile2)>0):
+                dic["imgurl"] = profile2[0].imgurl
+                dic["name"] = profile2[0].name
+            dic["id"]=f.user.id
+            response["follows"].append(dic)
+        return JsonResponse(response)
     else:
         return JsonResponse({"msg": "false"})
 
 @csrf_exempt
-#搜索某个用户
+#展示我的粉丝
+def showmyfans(request):
+    response = {}
+    response["msg"] = "true"
+    req = simplejson.loads(request.body)
+    sessionid = req["sessionid"]
+    dic = cache.get(sessionid)
+    if dic is None:
+        return JsonResponse({"msg": "expire"})
+    is_login = dic["is_login"]
+    username = dic["username"]
+    if is_login:
+        user = User.objects.get(username=username)
+        # 获得所有关注该用户的人
+        try:
+            fans = Friends.objects.get(user=user).followedby.all()
+        except Exception as e:
+            print(e)
+            fans =[]
+        # 将关注的人的头像，姓名和id返回
+        response["fans"] = []
+        for f in fans:
+            profile1=list(User_Profile_Graduate.objects.filter(user=f))
+            profile2=list(User_Profile_Company.objects.filter(user=f))
+            dic={}
+            if(len(profile1)>0):
+                dic["imgurl"] = profile1[0].imgurl
+                dic["name"] = profile1[0].name
+            if(len(profile2)>0):
+                dic["imgurl"] = profile1[0].imgurl
+                dic["name"] = profile1[0].name
+            dic["id"] = f.id
+            response["fans"].append(dic)
+        return JsonResponse(response)
+    else:
+        return JsonResponse({"msg": "false"})
+
+@csrf_exempt
+#展示我的消息
+def showmymessage(request):
+    if(request.method=="POST"):
+        response = {}
+        response["msg"] = "true"
+        req = simplejson.loads(request.body)
+        sessionid = req["sessionid"]
+        dic = cache.get(sessionid)
+        if dic is None:
+            return JsonResponse({"msg": "expire"})
+        is_login = dic["is_login"]
+        username = dic["username"]
+        if is_login:
+            try:
+                msgs=list(User.objects.get(username=username).myreceivemsg.all())
+            except Exception as e:
+                msgs=[]
+            response["messages"]=[]
+            for m in msgs:
+                profile1=list(User_Profile_Graduate.objects.filter(user=m.msgfrom))
+                profile2 = list(User_Profile_Company.objects.filter(user=m.msgfrom))
+                dic={}
+                if(len(profile1)>0):
+                    dic["name"] = profile1[0].name
+                    dic["imgurl"] = profile1[0].imgurl
+                if(len(profile2)>0):
+                    dic["name"] = profile1[0].name
+                    dic["imgurl"] = profile1[0].imgurl
+                dic["id"] = m.msgfrom.id
+                dic["text"]=m.text
+                dic["headline"]=m.headline
+                if dic is not None:
+                    response["messages"].append(dic)
+            return JsonResponse(response)
+        else:
+            return JsonResponse({"msg":"false"})
+    else:
+        return JsonResponse({"msg": "WM"})
+
+@csrf_exempt
+#根据关键字模糊搜索用户
+#关键字有:邮箱,姓名,用户名,
 def searchuser(requst):
     response={}
     response["msg"]="true"
+    req=simplejson.loads(requst.body)
     if requst.method=="POST":
-        req=simplejson.loads(requst.body)
-        email=req["email"]
-        sessionid = req["sessionid"]
-        dic=cache.get(sessionid)
-        if dic is None:
-            return JsonResponse({"msg":"expire"})
-        username=dic["username"]
-        is_login=dic["is_login"]
-        if is_login:
-            try:
-                searcher=User.objects.get(email=email,is_active=True)
-                user=list(User.objects.filter(email=email,is_active=True))
-                #不存在该用户
-                if len(user)==0:
-                    response["msg"]="false"
-                else:
-                    response["username"]=user[0].username
-                    img=list(imageprofile.objects.filter(user=user[0]))
-                    profile_s = list(user_profile_stu.objects.filter(user=user[0]))
-                    profile_g = list(user_profile_graduate.objects.filter(user=user[0]))
-                    friend= list(friends.objects.filter(user=user[0],whosfriend=searcher))
-                    if len(friend)>0:
-                        response["is_f"]="1"
-                    else:
-                        response["is_f"]="0"
-                    if len(profile_g)>0:
-                        response["self_sign"]=profile_g[0].self_sign
-                    if len(profile_s)>0:
-                        response["self_sign"] =profile_s[0].self_sign
-                    response["imgurl"]=img[0].imgurl
-                    response["uid"]=user[0].id
-            except Exception as e:
-                print(e)
-                response["msg"]=e
-            return JsonResponse(response)
+        key=req["key"]
+        response["users"]=[]
+        ans1=list(User_Profile_Graduate.objects.filter(Q(name__icontains=key)|Q(email__icontains=key)))
+        for a in ans1:
+            dic={}
+            dic["name"]=a.name
+            dic["id"]=a.user.id
+            dic["imgurl"]=a.imgurl
+            response["users"].append(dic)
+        ans2=User_Profile_Company.objects.filter(Q(name__icontains=key)|Q(email__icontains=key))
+        for a in ans2:
+            dic = {}
+            dic["name"] = a.name
+            dic["id"] = a.user.id
+            dic["imgurl"] = a.imgurl
+            response["users"].append(dic)
+        ans3=User.objects.filter(username__icontains=key)
+        for a in ans3:
+            dic={}
+            profile1=list(User_Profile_Graduate.objects.filter(user=a))
+            dic["name"]=None
+            dic["imgurl"]=None
+            if(len(profile1)>0):
+                dic["name"]=profile1[0].name
+                dic["imgurl"]=profile1[0].imgurl
+            profile2=list(User_Profile_Company.objects.filter(user=a))
+            if (len(profile2) > 0):
+                dic["name"] = profile2[0].name
+                dic["imgurl"] = profile2[0].imgurl
+            dic["id"] = a.id
+            response["users"].append(dic)
+        return JsonResponse(response)
 
+    else:
+        return JsonResponse({"msg":"WM"})
 
 

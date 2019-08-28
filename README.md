@@ -15,3 +15,10 @@ pip install django-cors-headers
 ```
 pip install simplejson
 ```
+
+3.如果报错 no such table
+则建立一个表:
+
+```
+python manage.py createcachetable my_cacche_table
+```

@@ -7,7 +7,7 @@ from django.conf import settings
 import simplejson
 from django.core.cache import cache
 #注意导入这个应用的时候
-from user.models import imageprofile,user_profile_graduate,user_profile_stu,user_profile_company
+from user.models import User_Profile_Graduate,User_Profile_Stu,User_Profile_Company
 
 #上传帖子基本信息
 @csrf_exempt
@@ -110,9 +110,9 @@ def getpost(request):
            response[postname]["itemtype"]=post.itemtype
            #获取发布者的昵称
            user=User.objects.get(id=post.user.id)
-           stu_profile = list(user_profile_stu.objects.filter(user=user))
-           c_profile = list(user_profile_company.objects.filter(user=user))
-           g_profile = list(user_profile_graduate.objects.filter(user=user))
+           stu_profile = list(User_Profile_Stu.objects.filter(user=user))
+           c_profile = list(User_Profile_Company.objects.filter(user=user))
+           g_profile = list(User_Profile_Graduate.objects.filter(user=user))
            if len(stu_profile) > 0:
                response[postname]["postername"] = stu_profile[0].name
            if len(c_profile) > 0:
@@ -124,7 +124,7 @@ def getpost(request):
                user = User.objects.get(id=post.user.id)
            except Exception as e:
                print(e)
-           img=list(imageprofile.objects.filter(user=user))
+           img=list(ImageProfile.objects.filter(user=user))
            if len(img)>0:
                response[postname]["userimg"] = img[0].imgurl
            imgs=Picture.objects.filter(post=post)
@@ -154,25 +154,25 @@ def getpostcomment(request):
             com["receiverimg"] = ""
             #拿到发送者的姓名和头像
             user = User.objects.get(id=comment.user.id)
-            stu_profile = list(user_profile_stu.objects.filter(user=user))
-            c_profile = list(user_profile_company.objects.filter(user=user))
-            g_profile = list(user_profile_graduate.objects.filter(user=user))
+            stu_profile = list(User_Profile_Stu.objects.filter(user=user))
+            c_profile = list(User_Profile_Company.objects.filter(user=user))
+            g_profile = list(User_Profile_Graduate.objects.filter(user=user))
             if len(stu_profile)>0:
                 com["sendername"] = stu_profile[0].name
             if len(c_profile) > 0:
                 com["sendername"] = c_profile[0].name
             if len(g_profile) > 0:
                 com["sendername"] = g_profile[0].name
-            img=list(imageprofile.objects.filter(user=user))
+            img=list(ImageProfile.objects.filter(user=user))
             if len(img)>0:
                 com["senderimg"]=img[0].imgurl
 
             #拿到接受者的姓名和头像
             if comment.to_which_user is not None:
                 user = User.objects.get(id=comment.to_which_user.id)
-                stu_profile = list(user_profile_stu.objects.filter(user=user))
-                c_profile = list(user_profile_company.objects.filter(user=user))
-                g_profile = list(user_profile_graduate.objects.filter(user=user))
+                stu_profile = list(User_Profile_Stu.objects.filter(user=user))
+                c_profile = list(User_Profile_Company.objects.filter(user=user))
+                g_profile = list(User_Profile_Graduate.objects.filter(user=user))
                 if len(stu_profile) > 0:
                     com["receivername"] = stu_profile[0].name
                 if len(c_profile) > 0:

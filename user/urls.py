@@ -22,17 +22,17 @@ urlpatterns=[
     path('get_profile/', views.get_profile, name='get_profile'),
     #更新个人信息
     path('update_profile/', views.update_profile, name='update_profile'),
-    #添加好友
-    path('add_friend/',views.addfriend,name='add_friend'),
-    #展示好友列表
-    path('show_friends/',views.showfriends,name='show_friends'),
-    #搜索用户
-    path('search_user/',views.searchuser,name='search_user'),
-    #是否接受好友申请
-    path('accept_friend/',views.acceptfriend,name='accept_friend'),
     #函数验证的函数
-    path('verify/',views.active,name='verify')
-
-
+    path('verify/',views.active,name='verify'),
+    # 关注某人
+    path('follow/', views.follw, name='follow'),
+    # 展示我关注的人
+    path('myfollows/', views.showmyfollows, name='showmyfollows'),
+    # 展示关注我的人
+    path('myfans/',views.showmyfans,name='showmyfans'),
+    # 搜索用户
+    path('searchuser/', views.searchuser, name='serachuser'),
+    # 展示我的消息
+    path('mymsgs/',views.showmymessage,name='showmymessage')
 ]
 

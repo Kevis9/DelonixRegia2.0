@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.core.cache import cache
 from django.conf import settings
 import simplejson
-from user.models import friends,user_profile_graduate,user_profile_stu,user_profile_company,imageprofile
+from user.models import Friends,User_Profile_Graduate,User_Profile_Stu,User_Profile_Company
 from operator import attrgetter
 
 #获取朋友的所有帖子
@@ -26,7 +26,7 @@ def getallpost(request):
         response["allpost"]=[]
         #获取用户所有的朋友
         user=User.objects.get(username=username)
-        myfriends=list(friends.objects.filter(whosfriend=user))
+        myfriends=list(Friends.objects.filter(whosfriend=user))
         for myfriend in myfriends:
             my=User.objects.get(id=myfriend.user.id)
             all_my_friend_post=FriendCircle.objects.filter(user=my)
@@ -60,9 +60,9 @@ def getallpost(request):
             postins["imgurls"]=arr_img
             # 获取发布者的昵称
             user = User.objects.get(id=post.user.id)
-            stu_profile = list(user_profile_stu.objects.filter(user=user))
-            c_profile = list(user_profile_company.objects.filter(user=user))
-            g_profile = list(user_profile_graduate.objects.filter(user=user))
+            stu_profile = list(User_Profile_Stu.objects.filter(user=user))
+            c_profile = list(User_Profile_Company.objects.filter(user=user))
+            g_profile = list(User_Profile_Graduate.objects.filter(user=user))
             if len(stu_profile) > 0:
                 postins["postername"] = stu_profile[0].name
             if len(c_profile) > 0:
@@ -74,7 +74,7 @@ def getallpost(request):
                 user = User.objects.get(id=post.user.id)
             except Exception as e:
                 print(e)
-            img = list(imageprofile.objects.filter(user=user))
+            img = list(ImageProfile.objects.filter(user=user))
             if len(img) > 0:
                 postins["userimg"] = img[0].imgurl
             response["allpost"].append(postins)
@@ -175,25 +175,25 @@ def getpostcomment(request):
             com["receiverimg"] = ""
             #拿到发送者的姓名和头像
             user = User.objects.get(id=comment.user.id)
-            stu_profile = list(user_profile_stu.objects.filter(user=user))
-            c_profile = list(user_profile_company.objects.filter(user=user))
-            g_profile = list(user_profile_graduate.objects.filter(user=user))
+            stu_profile = list(User_Profile_Stu.objects.filter(user=user))
+            c_profile = list(User_Profile_Company.objects.filter(user=user))
+            g_profile = list(User_Profile_Graduate.objects.filter(user=user))
             if len(stu_profile)>0:
                 com["sendername"] = stu_profile[0].name
             if len(c_profile) > 0:
                 com["sendername"] = c_profile[0].name
             if len(g_profile) > 0:
                 com["sendername"] = g_profile[0].name
-            img=list(imageprofile.objects.filter(user=user))
+            img=list(ImageProfile.objects.filter(user=user))
             if len(img)>0:
                 com["senderimg"]=img[0].imgurl
 
             #拿到接受者的姓名和头像
             if comment.to_which_user is not None:
                 user = User.objects.get(id=comment.to_which_user.id)
-                stu_profile = list(user_profile_stu.objects.filter(user=user))
-                c_profile = list(user_profile_company.objects.filter(user=user))
-                g_profile = list(user_profile_graduate.objects.filter(user=user))
+                stu_profile = list(User_Profile_Stu.objects.filter(user=user))
+                c_profile = list(User_Profile_Company.objects.filter(user=user))
+                g_profile = list(User_Profile_Graduate.objects.filter(user=user))
                 if len(stu_profile) > 0:
                     com["receivername"] = stu_profile[0].name
                 if len(c_profile) > 0:
