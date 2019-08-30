@@ -66,19 +66,8 @@ class EducationExperience(models.Model):
     def get_absolute_url(self):
         return reverse('教育经历', args=[self.user.id])
 
-# #头像类
-# class ImageProfile(models.Model):
-#     user = models.ForeignKey(User, verbose_name="用户头像", on_delete=models.CASCADE, related_name="user_imageprofile",null=True, blank=True)
-#
-#     class Meta:
-#         verbose_name = '头像'
-#         verbose_name_plural = verbose_name
-#
-#     def __str__(self):
-#         return "{}".format(self.user)
-#
-#     def get_absolute_url(self):
-#         return reverse('头像', args=[self.user.id])
+
+
 #毕业生
 class User_Profile_Graduate(models.Model):
     #user作为主键
@@ -186,6 +175,18 @@ class User_Profile_Company(models.Model):
     email = models.EmailField("邮件", max_length=128, null=True, blank=True)
     class Meta:
         verbose_name = '企业个人信息'
+        verbose_name_plural = verbose_name
+    def __str__(self):
+        return "{}".format(self.user)
+
+#简历
+class Resume(models.Model):
+    user=models.ForeignKey(User_Profile_Graduate,on_delete=models.CASCADE,related_name="myresume",verbose_name="毕业生的简历")
+    company=models.ManyToManyField(User_Profile_Company,verbose_name="投递到的公司",related_name="resumefromgraduate")
+    url=models.CharField("简历所在的路径",max_length=200,null=False)
+    name=models.CharField("简历的名字",max_length=50,null=False)
+    class Meta:
+        verbose_name = '简历表'
         verbose_name_plural = verbose_name
     def __str__(self):
         return "{}".format(self.user)

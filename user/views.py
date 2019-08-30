@@ -4,7 +4,7 @@ from django.http import JsonResponse,HttpResponse
 from .models import User_Profile_Stu,\
     User_Profile_Graduate,\
     User_Profile_Company,JobExperience,\
-    EducationExperience,Friends,Message
+    EducationExperience,Friends,Message,Resume
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token ,rotate_token
 from django.core.mail import send_mail,send_mass_mail,EmailMultiAlternatives
@@ -19,6 +19,9 @@ from django.contrib.auth.hashers import check_password,make_password
 import random
 from django.forms.models import model_to_dict
 from django.db.models import Q
+import os
+import uuid
+
 localurl="http://172.16.3.61:8000"
 
 
@@ -166,7 +169,7 @@ def verifyandsetpas(request):
 def changepas(request):
     response = {}
     if request.method == 'POST':
-        response["msg"] = "ture"
+        response["msg"] = "true"
         req = simplejson.loads(request.body)
         username = req['username']
         oldpassword=req["oldpassword"]
@@ -467,9 +470,11 @@ def showmyfollows(request):
             if(len(profile1)>0):
                 dic["imgurl"] = profile1[0].imgurl
                 dic["name"] = profile1[0].name
+                dic["gender"]=profile1[0].gender
             if(len(profile2)>0):
                 dic["imgurl"] = profile2[0].imgurl
                 dic["name"] = profile2[0].name
+                dic["gender"]=profile2[0].gender
             dic["id"]=f.user.id
             response["follows"].append(dic)
         return JsonResponse(response)
@@ -505,9 +510,11 @@ def showmyfans(request):
             if(len(profile1)>0):
                 dic["imgurl"] = profile1[0].imgurl
                 dic["name"] = profile1[0].name
+                dic["gender"]=profile1[0].gender
             if(len(profile2)>0):
-                dic["imgurl"] = profile1[0].imgurl
-                dic["name"] = profile1[0].name
+                dic["imgurl"] = profile2[0].imgurl
+                dic["name"] = profile2[0].name
+                dic["gender"] = profile2[0].gender
             dic["id"] = f.id
             response["fans"].append(dic)
         return JsonResponse(response)
@@ -557,11 +564,11 @@ def showmymessage(request):
 @csrf_exempt
 #根据关键字模糊搜索用户
 #关键字有:邮箱,姓名,用户名,
-def searchuser(requst):
+def searchuser(request):
     response={}
     response["msg"]="true"
-    req=simplejson.loads(requst.body)
-    if requst.method=="POST":
+    req=simplejson.loads(request.body)
+    if request.method=="POST":
         key=req["key"]
         response["users"]=[]
         ans1=list(User_Profile_Graduate.objects.filter(Q(name__icontains=key)|Q(email__icontains=key)))
@@ -570,6 +577,7 @@ def searchuser(requst):
             dic["name"]=a.name
             dic["id"]=a.user.id
             dic["imgurl"]=a.imgurl
+            dic["gender"]=a.gender
             response["users"].append(dic)
         ans2=User_Profile_Company.objects.filter(Q(name__icontains=key)|Q(email__icontains=key))
         for a in ans2:
@@ -577,6 +585,7 @@ def searchuser(requst):
             dic["name"] = a.name
             dic["id"] = a.user.id
             dic["imgurl"] = a.imgurl
+            dic["gender"] = a.gender
             response["users"].append(dic)
         ans3=User.objects.filter(username__icontains=key)
         for a in ans3:
@@ -587,10 +596,12 @@ def searchuser(requst):
             if(len(profile1)>0):
                 dic["name"]=profile1[0].name
                 dic["imgurl"]=profile1[0].imgurl
+                dic["gender"] = profile1[0].gender
             profile2=list(User_Profile_Company.objects.filter(user=a))
             if (len(profile2) > 0):
                 dic["name"] = profile2[0].name
                 dic["imgurl"] = profile2[0].imgurl
+                dic["gender"] = profile2[0].gender
             dic["id"] = a.id
             response["users"].append(dic)
         return JsonResponse(response)
@@ -599,3 +610,31 @@ def searchuser(requst):
         return JsonResponse({"msg":"WM"})
 
 
+@csrf_exempt
+#投递简历
+def sendresume(request):
+    if(request.method=="POST"):
+        sessionid = request.POST["sessionid"]
+        dic = cache.get(sessionid)
+        if dic is None:
+            return JsonResponse({"msg": "expire"})
+        is_login = dic["is_login"]
+        username = dic["username"]
+        try:
+            user=User.objects.get(username=username)
+            user_graduate=User_Profile_Graduate.objects.get(user=user)
+            file = request.FILES['resume']
+            #创建一个唯一的文件名,注意加上后缀名,wb+代表二进制写的形式打开文件
+            id=str(uuid.uuid4())+os.path.splitext(file.name)[1]
+            #创建一个resume实例,记录路径
+            resume=Resume(user=user_graduate,url=id,name=request.POST["name"])
+            resume.save()
+            with open(os.path.join(settings.BASE_DIR,"media","resume",id),'wb+') as f:
+                for chunk in file.chunks():
+                    f.write(chunk)
+            return JsonResponse({"msg":"true"})
+        except Exception as e:
+            print(e)
+            return JsonResponse({"msg":"false"})
+    else:
+        return JsonResponse({"msg":"WM"})

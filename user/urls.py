@@ -33,6 +33,8 @@ urlpatterns=[
     # 搜索用户
     path('searchuser/', views.searchuser, name='serachuser'),
     # 展示我的消息
-    path('mymsgs/',views.showmymessage,name='showmymessage')
+    path('mymsgs/',views.showmymessage,name='showmymessage'),
+    # 上传简历
+    path('sendresume/',views.sendresume,name='sendresume')
 ]
 
