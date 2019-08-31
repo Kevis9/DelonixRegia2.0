@@ -189,6 +189,9 @@ ALLOWED_HOSTS = ['*']
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
+#设置session在session表中的期限,默认为2周,超过之后key就会被删除,重新随机生成
+# SESSION_COOKIE_AGE = 30
+
 #Cache设置 利用数据库存储cache,memcached暂时先不考虑
 CACHES = {
     'default': {

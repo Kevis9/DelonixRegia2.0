@@ -4,7 +4,8 @@ from django.http import JsonResponse,HttpResponse
 from .models import User_Profile_Stu,\
     User_Profile_Graduate,\
     User_Profile_Company,JobExperience,\
-    EducationExperience,Friends,Message,Resume
+    EducationExperience,Friends,Message,Company_Resume,\
+    Graduate_Resume
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token ,rotate_token
 from django.core.mail import send_mail,send_mass_mail,EmailMultiAlternatives
@@ -21,7 +22,7 @@ from django.forms.models import model_to_dict
 from django.db.models import Q
 import os
 import uuid
-
+import shutil
 localurl="http://172.16.3.61:8000"
 
 
@@ -204,7 +205,9 @@ def log_in(request):
                 login(request,user)
                 # request.session['is_login']=True
                 # request.session['username']=username
-                cache.set(request.session.session_key,{"username":username,"is_login":True},None)
+                # cache.set(key,value,timeout) timeout代笔缓存的时间，None意味着永久
+                # 在这里我将cache设置成数据库的BACKEND,memcached也可以，基于内存，或者redis
+                cache.set(request.session.session_key,{"username":username,"is_login":True},3600*3)
             else:
                 msg = "密码错误"
                 return JsonResponse({"msg":msg})
@@ -246,60 +249,63 @@ def log_out(request):
 @csrf_exempt
 #获取个人信息
 def get_profile(request):
-    req = simplejson.loads(request.body)
-    print(req)
-    identity=req.get("identity",None)
-    sessionid=req.get("sessionid",None)
-    dic=cache.get(sessionid)
-    #cache过期
-    if dic is None:
-        return JsonResponse({"msg":"expire"})
-    username=cache.get(sessionid).get("username",None)
-    is_login = cache.get(sessionid).get("is_login", False)  # 如果is_login没有设置值的话，默认为False
-    # username = request.session.get("username", None)
-    # is_login = request.session.get("is_login", False)  # 如果is_login没有设置值的话，默认为False
-    response = {}
-    msg = 'true'
-    #登陆成功
-    if is_login:
-        user=User.objects.get(username=username)
-        #毕业生
-        if identity=='1':
-            try:
-                userprofile = User_Profile_Graduate.objects.get(user=user)
-                #模型转为字典
-                response=model_to_dict(userprofile)
-                response["msg"]=msg
-                #工作经历的获取
-                joblist=list(JobExperience.objects.filter(user=user))
-                response["jobexperience"]=[]
-                for job in joblist:
-                    response["jobexperience"].append(model_to_dict(job))
-                print(response["jobexperience"])
-                # 头像获取
-                response["imgurl"] = userprofile.imgurl
-                return JsonResponse(response)
-            except Exception as e:
-                return JsonResponse({"msg":"false"})
-        #企业
-        if identity=='3':
-            try:
-                userprofile = User_Profile_Company.objects.get(user=user)
-                response["name"] = User_Profile_Company.name
-                response["email"]=User_Profile_Company.email
-                response["honour"]=User_Profile_Company.honour
-                response["identity"]=User_Profile_Company.identity
-                response["user_id"] = user.id
-                response["msg"]=msg
-                # 头像获取
-                response["imgurl"] = userprofile.imgurl
-                return JsonResponse(response)
-            except Exception as e:
-                response["msg"]=e
-                return JsonResponse(response)
+    if(request.method=="POST"):
+        req = simplejson.loads(request.body)
+        identity=req.get("identity")
+        sessionid=req.get("sessionid")
+        dic=cache.get(sessionid)
+        #cache过期
+        if dic is None:
+            return JsonResponse({"msg":"expire"})
+        username=cache.get(sessionid).get("username",None)
+        is_login = cache.get(sessionid).get("is_login", False)  # 如果is_login没有设置值的话，默认为False
+        # username = request.session.get("username", None)
+        # is_login = request.session.get("is_login", False)  # 如果is_login没有设置值的话，默认为False
+        response = {}
+        msg = 'true'
+        #登陆成功
+        if is_login:
+            user=User.objects.get(username=username)
+            #毕业生
+            if identity=='1':
+                try:
+                    userprofile = User_Profile_Graduate.objects.get(user=user)
+                    #模型转为字典
+                    response=model_to_dict(userprofile)
+                    response["msg"]=msg
+                    #工作经历的获取
+                    joblist=list(JobExperience.objects.filter(user=user))
+                    response["jobexperience"]=[]
+                    for job in joblist:
+                        response["jobexperience"].append(model_to_dict(job))
+                    print(response["jobexperience"])
+                    # 头像获取
+                    response["imgurl"] = userprofile.imgurl
+                    return JsonResponse(response)
+                except Exception as e:
+                    return JsonResponse({"msg":"false"})
+            #企业
+            if identity=='3':
+                try:
+                    userprofile = User_Profile_Company.objects.get(user=user)
+                    response["name"] = User_Profile_Company.name
+                    response["email"]=User_Profile_Company.email
+                    response["honour"]=User_Profile_Company.honour
+                    response["identity"]=User_Profile_Company.identity
+                    response["user_id"] = user.id
+                    response["msg"]=msg
+                    # 头像获取
+                    response["imgurl"] = userprofile.imgurl
+                    return JsonResponse(response)
+                except Exception as e:
+                    response["msg"]=e
+                    return JsonResponse(response)
+            return JsonResponse({"msg":"no identity"})
+        else:
+            response["msg"]="false"
+            return JsonResponse(response)
     else:
-        response["msg"]="false"
-        return JsonResponse(response)
+        return JsonResponse({"msg:WM"})
 
 @csrf_exempt
 #更新个人信息
@@ -611,30 +617,186 @@ def searchuser(request):
 
 
 @csrf_exempt
-#投递简历
-def sendresume(request):
+#上传简历
+#前端使用表单提交数据
+def uploadresume(request):
     if(request.method=="POST"):
         sessionid = request.POST["sessionid"]
+        print(request.POST)
         dic = cache.get(sessionid)
         if dic is None:
             return JsonResponse({"msg": "expire"})
         is_login = dic["is_login"]
         username = dic["username"]
         try:
-            user=User.objects.get(username=username)
-            user_graduate=User_Profile_Graduate.objects.get(user=user)
+            gra_user = User.objects.get(username=username)
+            #检验该用户的文件名是否存在
+            if(len(Graduate_Resume.objects.filter(Q(user=gra_user) and Q(name=request.POST["name"])))>0):
+                return JsonResponse({"msg":"exist"})
             file = request.FILES['resume']
             #创建一个唯一的文件名,注意加上后缀名,wb+代表二进制写的形式打开文件
-            id=str(uuid.uuid4())+os.path.splitext(file.name)[1]
+            id=os.path.join("media","resume",str(uuid.uuid4())+os.path.splitext(file.name)[1])
             #创建一个resume实例,记录路径
-            resume=Resume(user=user_graduate,url=id,name=request.POST["name"])
+            resume=Graduate_Resume(user=gra_user,url=id,name=request.POST["name"])
             resume.save()
-            with open(os.path.join(settings.BASE_DIR,"media","resume",id),'wb+') as f:
-                for chunk in file.chunks():
-                    f.write(chunk)
-            return JsonResponse({"msg":"true"})
+            try:
+                with open(os.path.join(settings.BASE_DIR,id),'wb+') as f:
+                    for chunk in file.chunks():
+                        f.write(chunk)
+            except Exception as e:
+                #如果上传失败则删除实例
+                resume.delete()
+                return JsonResponse({"msg":"false"})
+            #上传并且创建实例成功
+            return JsonResponse({"msg":"true","url":id})
         except Exception as e:
             print(e)
             return JsonResponse({"msg":"false"})
     else:
         return JsonResponse({"msg":"WM"})
+
+@csrf_exempt
+#删除简历
+def deleteresume(request):
+    if (request.method == "POST"):
+        req=simplejson.loads(request.body)
+        sessionid = req["sessionid"]
+        dic = cache.get(sessionid)
+        if dic is None:
+            return JsonResponse({"msg": "expire"})
+        try:
+            # 检验该用户的文件名是否存在,存在则删除该文件,否则返回错误
+            file1=Graduate_Resume.objects.filter(url=req["url"])
+            file2=Company_Resume.objects.filter(url=req["url"])
+            # 如果删除者是毕业生
+            if (len(file1) > 0):
+                path=os.path.join(settings.BASE_DIR,file1[0].url)
+                os.remove(path)
+                # 删除对应的model实例
+                file1[0].delete()
+                return JsonResponse({"msg":"true"})
+            # 如果删除者是企业
+            if (len(file2)>0):
+                path = os.path.join(settings.BASE_URL,file1[0].url)
+                os.remove(path)
+                file2[0].delete()
+                return JsonResponse({"msg": "true"})
+            return JsonResponse({"msg":"false"})
+        except Exception as e:
+            print(e)
+            return JsonResponse({"msg":"false"})
+    else:
+        return JsonResponse({"msg": "WM"})
+
+@csrf_exempt
+#展示毕业生简历,返回url
+def showgraresume(request):
+    if (request.method == "POST"):
+        req=simplejson.loads(request.body)
+        sessionid = req["sessionid"]
+        dic = cache.get(sessionid)
+        response={}
+        response["msg"]="true"
+        if dic is None:
+            return JsonResponse({"msg": "expire"})
+        username = dic["username"]
+        try:
+            gra_user=User.objects.get(username=username)
+            try:
+                resumes=list(gra_user.myresume.all())
+            except Exception as e:
+                #报出异常一般是all()数量为0
+                print(e)
+                resumes=[]
+            response["resumes"]=[]
+            for r in resumes:
+                dic=model_to_dict(r)
+                response["resumes"].append(dic)
+            return JsonResponse(response)
+        except Exception as e:
+            return JsonResponse({"msg":"false"})
+    else:
+        return JsonResponse({"msg": "WM"})
+
+#展示企业获得的简历,返回url
+def showcompanyresume(request):
+    if (request.method == "GET"):
+        req=simplejson.loads(request.body)
+        sessionid = req["sessionid"]
+        dic = cache.get(sessionid)
+        response={}
+        response["msg"]="true"
+        if dic is None:
+            return JsonResponse({"msg": "expire"})
+        username = dic["username"]
+        try:
+            com_user=User.objects.get(username=username)
+            try:
+                resumes=list(com_user.resumto.all())
+            except Exception as e:
+                #报出异常一般是all()数量为0
+                print(e)
+                resumes=[]
+            response["resumes"]=[]
+            for r in resumes:
+                dic=model_to_dict(r)
+                response["resumes"].append(dic)
+            return JsonResponse(response)
+        except Exception as e:
+            return JsonResponse({"msg":"false"})
+    else:
+        return JsonResponse({"msg": "WM"})
+
+@csrf_exempt
+#投递简历
+def sendresume(request):
+    if (request.method == "POST"):
+        req = simplejson.loads(request.body)
+        sessionid = req["sessionid"]
+        dic = cache.get(sessionid)
+        response = {}
+        response["msg"] = "true"
+        if dic is None:
+            return JsonResponse({"msg": "expire"})
+        username = dic["username"]
+        try:
+            gra_user=User.objects.get(username=username)
+            com_user=User.objects.get(id=req["cid"])
+            #找到文件路径
+            path=os.path.join(settings.BASE_DIR,req["url"])
+            #复制一份该文件,并且创建企业简历实例
+            #文件复制的方法有很多种，这个地方使用shutil模块，也可以自己定义
+            tmp=os.path.splitext(req["url"])
+            new_id=str(uuid.uuid4())+tmp[len(tmp)-1]
+            new_path=os.path.join(settings.BASE_DIR,"media","resume",new_id)
+            #创建企业简历实例
+            com_resume=Company_Resume(user=gra_user,url=new_id,company=com_user,name=req["name"])
+            #创建消息发送给相应的企业
+            msg=Message(msgfrom=gra_user,msgto=com_user,text=req["text"],headline=req["headline"])
+            # 复制文件并且保存实例在数据库
+            shutil.copyfile(path, new_path)
+            com_resume.save()
+            msg.save()
+            return JsonResponse({"msg":"true"})
+        except Exception as e:
+            return JsonResponse({"msg":"false"})
+    else:
+        return JsonResponse({"msg": "WM"})
+
+@csrf_exempt
+#下载文件
+def downloadfile(request):
+    if(request.method=="POST"):
+        req = simplejson.loads(request.body)
+        sessionid = req["sessionid"]
+        dic = cache.get(sessionid)
+        response = {}
+        response["msg"] = "true"
+        if dic is None:
+            return JsonResponse({"msg": "expire"})
+        with open(os.path.join(settings.BASE_DIR,req["url"]),'rb') as f:
+            response = HttpResponse(f)
+            tmp=os.path.splitext(req["url"])
+            response['Content-Disposition'] = 'attachment;filename='+'"'+tmp[len(tmp)-2]+tmp[len(tmp)-1]+'"'
+            response["Content-Type"]="application/octet-stream"
+        return response

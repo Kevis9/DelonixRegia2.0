@@ -3,7 +3,9 @@ from django.urls import path,re_path
 from django.conf.urls import include
 from django.views.generic import RedirectView
 from django.views.generic.base import TemplateView
-
+from django.views.static import serve
+from django.conf import settings
+import os
 urlpatterns = [
     #管理
     path('admin/', admin.site.urls),
@@ -26,5 +28,7 @@ urlpatterns = [
     #招聘
     path('recruit/',include('recruit.urls')),
     #测试
-    path('map',TemplateView.as_view(template_name="test.html"))
+    path('map',TemplateView.as_view(template_name="test.html")),
+    #静态文件的获取,简历
+    re_path('media/resume/(?P<path>.*)',serve,{"document_root":os.path.join(settings.MEDIA_ROOT,"resume")})
 ]

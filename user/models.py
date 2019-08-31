@@ -13,9 +13,9 @@ class Message(models.Model):
         verbose_name = '消息表'
         verbose_name_plural = verbose_name
     def __str__(self):
-        return "{}".format(self.id)
+        return "{}".format(self.msgfrom)
     def get_absolute_url(self):
-        return reverse('工作经历', args=[self.id])
+        return reverse('工作经历', args=[self.msgfrom])
 
 #职业经历
 class JobExperience(models.Model):
@@ -179,15 +179,26 @@ class User_Profile_Company(models.Model):
     def __str__(self):
         return "{}".format(self.user)
 
-#简历
-class Resume(models.Model):
-    user=models.ForeignKey(User_Profile_Graduate,on_delete=models.CASCADE,related_name="myresume",verbose_name="毕业生的简历")
-    company=models.ManyToManyField(User_Profile_Company,verbose_name="投递到的公司",related_name="resumefromgraduate")
+#毕业生个人的简历
+class Graduate_Resume(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="myresume",verbose_name="毕业生的简历")
     url=models.CharField("简历所在的路径",max_length=200,null=False)
     name=models.CharField("简历的名字",max_length=50,null=False)
     class Meta:
-        verbose_name = '简历表'
+        verbose_name = '毕业生简历表'
         verbose_name_plural = verbose_name
     def __str__(self):
         return "{}".format(self.user)
 
+#企业用户收到的简历表
+class Company_Resume(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="resumefrom",verbose_name="毕业生的简历")
+    company=models.ForeignKey(User,on_delete=models.CASCADE,related_name="resumeto",verbose_name="投递到的公司")
+    url = models.CharField("简历所在的路径", max_length=200, null=False)
+    name = models.CharField("简历的名字", max_length=50, null=False)
+    class Meta:
+        verbose_name = '企业用户简历表'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return "{}".format(self.user)

@@ -1,11 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8e8ee5e5-3c93-4ccb-80cd-601410d0ef87" name="Default" comment="【将数据库放上来】">
-      <change afterPath="$PROJECT_DIR$/user/migrations/0005_resume.py" afterDir="false" />
+    <list default="true" id="8e8ee5e5-3c93-4ccb-80cd-601410d0ef87" name="Default" comment="【增加发送简历接口】&#10;【修改部分代码】">
+      <change afterPath="$PROJECT_DIR$/media/resume/4c0b063a-e7a7-4bde-ac45-f0e82850ffb9.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/resume/72902c26-452b-4e78-8b73-2828c8a95c8b.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/resume/7aac4359-3ead-48e3-8a27-64c3d1606cce.jpg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/delonixregia/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/delonixregia/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/delonixregia/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/delonixregia/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/media/resume/cf1cbc04-b916-400c-ba06-dc76ec42ef82.doc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/recruit/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/recruit/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/migrations/0002_auto_20190828_0835.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/migrations/0003_auto_20190828_0836.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/migrations/0004_auto_20190828_0837.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/migrations/0005_resume.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/user/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/user/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/user/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/views.py" afterDir="false" />
@@ -239,7 +251,14 @@
       <option name="project" value="LOCAL" />
       <updated>1566994523644</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="【增加发送简历接口】&#10;【修改部分代码】">
+      <created>1567178017746</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1567178017746</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -263,7 +282,8 @@
     <MESSAGE value="【修改部分代码，更加简洁】&#10;【完善接口】" />
     <MESSAGE value="【修改好友列表为关注模式】&#10;【修改部分model,增强代码健壮性】" />
     <MESSAGE value="【将数据库放上来】" />
-    <option name="LAST_COMMIT_MESSAGE" value="【将数据库放上来】" />
+    <MESSAGE value="【增加发送简历接口】&#10;【修改部分代码】" />
+    <option name="LAST_COMMIT_MESSAGE" value="【增加发送简历接口】&#10;【修改部分代码】" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -272,6 +292,16 @@
           <url>file://$PROJECT_DIR$/lostandfound/views.py</url>
           <line>64</line>
           <option name="timeStamp" value="177" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/user/views.py</url>
+          <line>668</line>
+          <option name="timeStamp" value="229" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/user/views.py</url>
+          <line>251</line>
+          <option name="timeStamp" value="230" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

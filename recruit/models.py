@@ -49,11 +49,9 @@ class Comment(models.Model):
 class Picture(models.Model):
     post = models.ForeignKey(Recruit, on_delete=models.CASCADE, null=True)
     imgurl = models.CharField(max_length=1000, null=True, blank=True)
-
     class Meta:
         verbose_name = '招聘照片'
         verbose_name_plural = verbose_name
-
     def __str__(self):
         return "{}".format(self.post)
 

@@ -35,6 +35,16 @@ urlpatterns=[
     # 展示我的消息
     path('mymsgs/',views.showmymessage,name='showmymessage'),
     # 上传简历
-    path('sendresume/',views.sendresume,name='sendresume')
+    path('uploadresume/',views.uploadresume,name='uploadresume'),
+    # 展示毕业生简历信息
+    path('showgraresume/',views.showgraresume,name='showgraresume'),
+    # 展示企业简历信息
+    path('showcomresume/',views.showcompanyresume,name='showcomresume'),
+    # 删除简历
+    path('deleteresume/',views.deleteresume,name='deleteresume'),
+    # 投递简历
+    path('sendresume/',views.sendresume,name='sendresume'),
+    # 下载文件
+    path('downloadfile/',views.downloadfile,name="downloadfile")
 ]
 
