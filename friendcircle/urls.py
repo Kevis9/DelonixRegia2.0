@@ -8,10 +8,12 @@ urlpatterns=[
     path("uploadpost/",views.uploadpost),
     #发布评论
     path("uploadcomment/",views.uploadcomment),
+    #删除评论
+    path("deletecommnet/",views.deletecomment),
     #获得所有的帖子
     path("getallpost/",views.getallpost),
     #点赞
     path("add_likecount/",views.add_likecount),
-    #获得贴子的评论
-    path("getpostcomments/",views.getpostcomment)
+    # #获得贴子的评论
+    # path("getpostcomments/",views.getpostcomment)
 ]

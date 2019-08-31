@@ -1,25 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8e8ee5e5-3c93-4ccb-80cd-601410d0ef87" name="Default" comment="【增加发送简历接口】&#10;【修改部分代码】">
-      <change afterPath="$PROJECT_DIR$/media/resume/4c0b063a-e7a7-4bde-ac45-f0e82850ffb9.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/resume/72902c26-452b-4e78-8b73-2828c8a95c8b.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/resume/7aac4359-3ead-48e3-8a27-64c3d1606cce.jpg" afterDir="false" />
+    <list default="true" id="8e8ee5e5-3c93-4ccb-80cd-601410d0ef87" name="Default" comment="【完善简历接口】">
+      <change afterPath="$PROJECT_DIR$/user/migrations/0002_auto_20190831_1217.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/user/migrations/0003_auto_20190831_1328.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/delonixregia/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/delonixregia/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/delonixregia/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/delonixregia/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/media/resume/cf1cbc04-b916-400c-ba06-dc76ec42ef82.doc" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/recruit/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/recruit/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/migrations/0002_auto_20190828_0835.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/migrations/0003_auto_20190828_0836.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/migrations/0004_auto_20190828_0837.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/migrations/0005_resume.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/friendcircle/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/friendcircle/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/friendcircle/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/friendcircle/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/friendcircle/migrations/0002_auto_20190413_2353.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/friendcircle/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/friendcircle/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/friendcircle/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/friendcircle/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/friendcircle/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/friendcircle/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/user/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/user/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/views.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -258,7 +251,14 @@
       <option name="project" value="LOCAL" />
       <updated>1567178017746</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="【完善简历接口】">
+      <created>1567242245270</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1567242245270</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -283,7 +283,8 @@
     <MESSAGE value="【修改好友列表为关注模式】&#10;【修改部分model,增强代码健壮性】" />
     <MESSAGE value="【将数据库放上来】" />
     <MESSAGE value="【增加发送简历接口】&#10;【修改部分代码】" />
-    <option name="LAST_COMMIT_MESSAGE" value="【增加发送简历接口】&#10;【修改部分代码】" />
+    <MESSAGE value="【完善简历接口】" />
+    <option name="LAST_COMMIT_MESSAGE" value="【完善简历接口】" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -299,9 +300,9 @@
           <option name="timeStamp" value="229" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/user/views.py</url>
-          <line>251</line>
-          <option name="timeStamp" value="230" />
+          <url>file://$PROJECT_DIR$/friendcircle/views.py</url>
+          <line>15</line>
+          <option name="timeStamp" value="247" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

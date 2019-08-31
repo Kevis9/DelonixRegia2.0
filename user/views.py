@@ -207,7 +207,7 @@ def log_in(request):
                 # request.session['username']=username
                 # cache.set(key,value,timeout) timeout代笔缓存的时间，None意味着永久
                 # 在这里我将cache设置成数据库的BACKEND,memcached也可以，基于内存，或者redis
-                cache.set(request.session.session_key,{"username":username,"is_login":True},3600*3)
+                cache.set(request.session.session_key,{"username":username,"is_login":True},3600*24*3)
             else:
                 msg = "密码错误"
                 return JsonResponse({"msg":msg})

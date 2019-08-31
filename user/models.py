@@ -42,7 +42,7 @@ class Friends(models.Model):
     #朋友的id是唯一的，对应于一个User，一个User也相当于一个朋友
     user=models.OneToOneField(User,verbose_name="朋友的id",on_delete=models.CASCADE,related_name="fid",blank=True,null=True)
     #一个User同时也有多个friends
-    followedby=models.ManyToManyField(User, verbose_name="谁的朋友",related_name="follwedby")
+    followedby=models.ManyToManyField(User, verbose_name="谁的朋友",related_name="myfollows",null=True)
     class Meta:
         verbose_name = '关注对象表'
         verbose_name_plural = verbose_name
