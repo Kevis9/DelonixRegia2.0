@@ -11,7 +11,7 @@ class FriendPost(models.Model):
     title = models.CharField("标题",max_length=254,null=False)  # 标题
     user = models.ForeignKey(User, related_name='myposts', verbose_name='创建人', on_delete=models.CASCADE,null=False)
     content = models.TextField(max_length=4000, verbose_name='帖子内容',null=False)
-    created_time = models.DateTimeField(auto_now_add=True,null=True)
+    created_time = models.DateTimeField(auto_now_add=True,null=False)
     like_count = models.BigIntegerField("点赞数", null=True, default=0)
     # image
     class Meta:
@@ -19,7 +19,7 @@ class FriendPost(models.Model):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return "{}".format(self.user)
+        return "{}".format(self.title)
 
     def get_absolute_url(self):
         return reverse('fpost', args=[self.user.id])
@@ -40,7 +40,7 @@ class Comment(models.Model):
         verbose_name = '朋友圈评论表'
         verbose_name_plural = verbose_name
     def __str__(self):
-        return "{}".format(self.user)
+        return "{}".format(self.content)
     def get_absolute_url(self):
         return reverse('fcommemt', args=[self.user.id])
 

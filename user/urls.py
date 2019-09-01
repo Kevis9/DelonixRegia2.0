@@ -26,6 +26,8 @@ urlpatterns=[
     path('verify/',views.active,name='verify'),
     # 关注某人
     path('follow/', views.follw, name='follow'),
+    # 取消关注
+    path('unfollow/',views.unfollow,name='unfollow'),
     # 展示我关注的人
     path('myfollows/', views.showmyfollows, name='showmyfollows'),
     # 展示关注我的人

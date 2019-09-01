@@ -28,11 +28,9 @@ def getallpost(request):
         user=User.objects.get(username=username)
         try:
             myfollows=list(user.followedby.all())
-
         except Exception as e:
             print(e)
             myfollows=[]
-            myfollows.append(user)
         for f in myfollows:
             try:
                 all_my_friend_post=list(f.myposts.all())
@@ -70,14 +68,27 @@ def getallpost(request):
                 comments=[]
             dic["pics_url"] = []
             dic["comments"]=[]
+            dic["mycomments"] = []
             for i in imgs:
                 dic["pics_url"].append(i.imgurl)
             for c in comments:
                 tmp={}
-                tmp["from"]=c.user.username
-                tmp["to"]=c.to_which_user.username
+                gra_profile=list(User_Profile_Graduate.objects.filter(user=c.user))
+                com_profile =list(User_Profile_Company.objects.filter(user=c.user))
+                if(len(gra_profile)>0):
+                    tmp["from"]=gra_profile[0].name
+                if(len(com_profile)>0):
+                    tmp["from"] = com_profile[0].name
+                gra_profile = list(User_Profile_Graduate.objects.filter(user=c.to_which_user))
+                com_profile = list(User_Profile_Company.objects.filter(user=c.to_which_user))
+                if (len(gra_profile) > 0):
+                    tmp["to"] = gra_profile[0].name
+                if (len(com_profile) > 0):
+                    tmp["to"] = com_profile[0].name
+                tmp["fromusername"]=c.user.username
                 tmp["content"]=c.content
                 tmp["time_lab"]=c.created_time
+                tmp["commentid"]=c.id
                 dic["comments"].append(tmp)
             response["allpost"].append(dic)
         return JsonResponse(response)
@@ -96,13 +107,12 @@ def uploadcomment(request):
             return JsonResponse({"msg": "expire"})
         username = dic["username"]
         to_which_post = FriendPost.objects.get(id=req["postid"])
-        to_which_user = None
         try:
             poster_name = req.get("poster_name", None)
             to_which_user = User.objects.get(username=poster_name)
             user = User.objects.get(username=username)
             content = req["content"]
-            comment = Comment(user=user, content=content, to_which_user=to_which_user, to_which_post=to_which_post)
+            comment = Comment(user=user, content=content, to_which_user=to_which_user, post=to_which_post)
             comment.save()
             response["commentid"] = comment.id
         except Exception as e:
@@ -110,6 +120,7 @@ def uploadcomment(request):
         return JsonResponse(response)
     else:
         return JsonResponse({"msg":"WM"})
+
 @csrf_exempt
 #删除评论
 def deletecomment(request):
@@ -121,7 +132,7 @@ def deletecomment(request):
         if dic is None:
             return JsonResponse({"msg": "expire"})
         username = dic["username"]
-        cid=dic["commentid"]
+        cid=req["commentid"]
         try:
             comment = Comment.objects.get(id=cid)
             comment.delete()
@@ -176,54 +187,52 @@ def uploadpost(request):
             response["msg"]="false"
         return JsonResponse(response)
 
-# #获取帖子的评论
-# @csrf_exempt
-# def getpostcomment(request):
-#     response={}
-#     response["msg"]="true"
-#     if request.method=="POST":
-#         req=simplejson.loads(request.body)
-#         postid=req["postid"]
-#         post=FriendPost.objects.get(id=postid)
-#         comments=list(Comment.objects.filter(to_which_post=post).order_by("created_time"))
-#         response["comments"]=[]
-#         for comment in comments:
-#             com={}
-#             com["content"]=comment.content
-#             com["sendername"]=""
-#             com["senderimg"] = ""
-#             com["receivername"] = ""
-#             com["receiverimg"] = ""
-#             #拿到发送者的姓名和头像
-#             user = User.objects.get(id=comment.user.id)
-#             stu_profile = list(User_Profile_Stu.objects.filter(user=user))
-#             c_profile = list(User_Profile_Company.objects.filter(user=user))
-#             g_profile = list(User_Profile_Graduate.objects.filter(user=user))
-#             if len(stu_profile)>0:
-#                 com["sendername"] = stu_profile[0].name
-#             if len(c_profile) > 0:
-#                 com["sendername"] = c_profile[0].name
-#             if len(g_profile) > 0:
-#                 com["sendername"] = g_profile[0].name
-#             img=list(ImageProfile.objects.filter(user=user))
-#             if len(img)>0:
-#                 com["senderimg"]=img[0].imgurl
-#
-#             #拿到接受者的姓名和头像
-#             if comment.to_which_user is not None:
-#                 user = User.objects.get(id=comment.to_which_user.id)
-#                 stu_profile = list(User_Profile_Stu.objects.filter(user=user))
-#                 c_profile = list(User_Profile_Company.objects.filter(user=user))
-#                 g_profile = list(User_Profile_Graduate.objects.filter(user=user))
-#                 if len(stu_profile) > 0:
-#                     com["receivername"] = stu_profile[0].name
-#                 if len(c_profile) > 0:
-#                     com["receivername"] = c_profile[0].name
-#                 if len(g_profile) > 0:
-#                     com["receivername"] = g_profile[0].name
-#             com["commentid"]=comment.id
-#             com["senderid"]=comment.user.id
-#             com["created_time"]=comment.created_time
-#             response["comments"].append(com)
-#
-#         return JsonResponse(response)
+# 获取帖子的评论
+@csrf_exempt
+def getpostcomment(request):
+    response={}
+    response["msg"]="true"
+    if request.method=="POST":
+        req=simplejson.loads(request.body)
+        dic=cache.get(req["sessionid"])
+        if dic is None:
+            return JsonResponse({"msg":"expire"})
+        postid=req["postid"]
+        post=FriendPost.objects.get(id=postid)
+        try:
+            comments=list(post.postcomments.all().order_by("-created_time"))
+        except Exception as e:
+            comments=[]
+        response["comments"]=[]
+        for comment in comments:
+            com={}
+            com["content"]=comment.content
+            com["from"]=""
+            com["fromimg"] = ""
+            com["to"] = ""
+            # 拿发送者的姓名和头像
+            user = User.objects.get(id=comment.user.id)
+            gra_profile = list(User_Profile_Graduate.objects.filter(user=user))
+            com_profile = list(User_Profile_Company.objects.filter(user=user))
+            if len(gra_profile)>0:
+                com["from"] = gra_profile[0].name
+                com["fromimg"]=gra_profile[0].imgurl
+            if len(com_profile) > 0:
+                com["from"] = com_profile[0].name
+                com["fromimg"] = com_profile[0].imgurl
+            #拿接受者的姓名
+            if comment.to_which_user is not None:
+                user = User.objects.get(id=comment.to_which_user.id)
+                com_profile = list(User_Profile_Company.objects.filter(user=user))
+                gra_profile = list(User_Profile_Graduate.objects.filter(user=user))
+                if len(gra_profile) > 0:
+                    com["to"] = gra_profile[0].name
+                if len(com_profile) > 0:
+                    com["to"] = com_profile[0].name
+            com["commentid"]=comment.id
+            com["fromusername"]=comment.user.username
+            com["created_time"]=comment.created_time
+            response["comments"].append(com)
+        return JsonResponse(response)
+    else:
+        return JsonResponse({"msg":"WM"})

@@ -62,6 +62,7 @@ def register(request):
             user.save()
             # 保存到数据库
             # 设置用户的身份
+            # 初始化部分信息
             if identity=="1":
                 profile=User_Profile_Graduate(user=user)
             if identity=="2":
@@ -71,6 +72,8 @@ def register(request):
             profile.identity = identity
             profile.email = email
             profile.save()
+            fuser = Friends(user=user, follwby=user)
+            fuser.save()
             job=JobExperience(user=user)
             job.save()
             e=EducationExperience(user=user)
@@ -424,10 +427,10 @@ def follw(request):
         is_login=dic["is_login"]
         if is_login:
             try:
-                #朋友的id拿到user
+                # 拿到申请者user
+                user = User.objects.get(username=username)
+                #关注人的id
                 fuser=User.objects.get(id=fid)
-                #拿到申请者user
-                user=User.objects.get(username=username)
                 tmp=list(Friends.objects.filter(user=fuser))
                 if(len(tmp)==0):
                     #friend=Friends(user=fuser) 这样写应该只是在内存中创建，不再表中创建
@@ -435,7 +438,7 @@ def follw(request):
                     print(friend.id)
                 else:
                     friend=tmp[0]
-                friend.followedby.add(user)
+                friend.myfollows.add(user)
                 friend.save()
                 message=Message(text=req["text"],msgfrom=user,msgto=fuser,headline=req["headline"])
                 message.save()
@@ -447,6 +450,23 @@ def follw(request):
             response["msg"]="false"
             return JsonResponse(response)
     return JsonResponse({"msg":"WM"})
+
+@csrf_exempt
+#取消关注某人
+def unfollow(request):
+    if(request.method=="POST"):
+        req=simplejson.loads(request.body)
+        dic=cache.get(req["sessionid"])
+        if dic is None:
+            return JsonResponse({"msg":"expire"})
+        try:
+            fuser=Friends.objects.get(user=User.objects.get(id=req["fid"]))
+            fuser.followedby.remove(User.objects.get(username=dic["username"]))
+            return JsonResponse({"msg":"true"})
+        except Exception as e:
+            return JsonResponse({"msg":"false"})
+    else:
+        return JsonResponse({"msg":"WM"})
 
 @csrf_exempt
 #展示我关注的人
@@ -464,9 +484,9 @@ def showmyfollows(request):
         user = User.objects.get(username=username)
         # 获得该用户的所有关注的人
         try:
-            concerns = list(user.follwedby.all())
+            concerns = list(user.myfollows.all())
         except Exception as e:
-            concerns=None
+            concerns=[]
         # 将关注的人的头像，姓名和id返回
         response["follows"] = []
         for f in concerns:
@@ -480,7 +500,7 @@ def showmyfollows(request):
             if(len(profile2)>0):
                 dic["imgurl"] = profile2[0].imgurl
                 dic["name"] = profile2[0].name
-                dic["gender"]=profile2[0].gender
+                dic["gender"]=""
             dic["id"]=f.user.id
             response["follows"].append(dic)
         return JsonResponse(response)
@@ -503,7 +523,7 @@ def showmyfans(request):
         user = User.objects.get(username=username)
         # 获得所有关注该用户的人
         try:
-            fans = Friends.objects.get(user=user).followedby.all()
+            fans = Friends.objects.get(user=user).myfollows.all()
         except Exception as e:
             print(e)
             fans =[]
@@ -575,23 +595,34 @@ def searchuser(request):
     response["msg"]="true"
     req=simplejson.loads(request.body)
     if request.method=="POST":
+        dic=cache.get(req["sessionid"])
+        if dic is None:
+            return JsonResponse({"msg":"expire"})
+        user=User.objects.get(username=dic["username"])
         key=req["key"]
         response["users"]=[]
         ans1=list(User_Profile_Graduate.objects.filter(Q(name__icontains=key)|Q(email__icontains=key)))
-        for a in ans1:
-            dic={}
-            dic["name"]=a.name
-            dic["id"]=a.user.id
-            dic["imgurl"]=a.imgurl
-            dic["gender"]=a.gender
-            response["users"].append(dic)
-        ans2=User_Profile_Company.objects.filter(Q(name__icontains=key)|Q(email__icontains=key))
+        ans2=list(User_Profile_Company.objects.filter(Q(name__icontains=key)|Q(email__icontains=key)))
+        try:
+            myfollows = list(user.myfollows.all())
+        except Exception as e:
+            myfollows=[]
+        myfollowsid=[]
+        for m in myfollows:
+            myfollowsid.append(m.user.id)
+        ans2.extend(ans1)
         for a in ans2:
             dic = {}
-            dic["name"] = a.name
-            dic["id"] = a.user.id
-            dic["imgurl"] = a.imgurl
-            dic["gender"] = a.gender
+            tmp=model_to_dict(a)
+            dic["name"] = tmp["name"]
+            dic["id"] = tmp["id"]
+            dic["imgurl"] = tmp["imgurl"]
+            dic["gender"] = tmp.get("gender","")
+            try:
+                myfollowsid.index(a.id)
+                dic["canfollow"]="false"
+            except Exception as e:
+                dic["canfollow"]="true"
             response["users"].append(dic)
         ans3=User.objects.filter(username__icontains=key)
         for a in ans3:
@@ -607,14 +638,19 @@ def searchuser(request):
             if (len(profile2) > 0):
                 dic["name"] = profile2[0].name
                 dic["imgurl"] = profile2[0].imgurl
-                dic["gender"] = profile2[0].gender
+                dic["gender"] = ""
+            print(a.id)
             dic["id"] = a.id
+            try:
+                myfollowsid.index(a.id)
+                dic["canfollow"]="false"
+            except Exception as e:
+                dic["canfollow"]="true"
             response["users"].append(dic)
         return JsonResponse(response)
 
     else:
         return JsonResponse({"msg":"WM"})
-
 
 @csrf_exempt
 #上传简历
