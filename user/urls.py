@@ -3,7 +3,6 @@ from . import views
 
 urlpatterns=[
     #保证这个应用里面的都是接口，是给前端提供数据的接口
-
     #注册
     path('register/',views.register),
     #验证邮箱
@@ -47,6 +46,18 @@ urlpatterns=[
     # 投递简历
     path('sendresume/',views.sendresume,name='sendresume'),
     # 下载文件
-    path('downloadfile/',views.downloadfile,name="downloadfile")
+    path('downloadfile/',views.downloadfile,name="downloadfile"),
+    #校方接口
+    # 查看城市分布
+    path('showcity',views.showcity,name="showcity"),
+    # 查看就业率近五年
+    path('ShoweRateByYear',views.ShoweRateByYear,name='showratebyyaer'),
+    #查看就业率按专业
+    path('ShoweRateByMajor',views.ShoweRateByMajor,name='ShoweRateByMajor'),
+    #查看方向
+    path('ShowJobField',views.ShowJobField,name='ShowJobField'),
+    #查看薪水
+    path('showsalary',views.showsalary,name="showsalary")
+
 ]
 

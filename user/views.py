@@ -23,6 +23,7 @@ from django.db.models import Q
 import os
 import uuid
 import shutil
+import datetime
 localurl="http://172.16.3.61:8000"
 
 
@@ -836,3 +837,177 @@ def downloadfile(request):
             response['Content-Disposition'] = 'attachment;filename='+'"'+tmp[len(tmp)-2]+tmp[len(tmp)-1]+'"'
             response["Content-Type"]="application/octet-stream"
         return response
+
+
+#校方接口
+#展示城市
+@csrf_exempt
+def showcity(request):
+    if(request.method=="POST"):
+        req=simplejson.loads(request.body)
+        dic=cache.get(req["sessionid"])
+        if dic is None:
+            return JsonResponse({"msg":"expire"})
+        if(dic["username"]!="stu"):
+            return JsonResponse({"msg":"forbid"})
+        #获取指定年份的毕业生
+        if(req["year"]=="total"):
+            try:
+                gra_profile = list(User_Profile_Graduate.objects.all())
+            except Exception as e:
+                gra_profile=[]
+        else:
+            gra_profile=list(User_Profile_Graduate.objects.filter(school_period_end__year=int(req["year"])))
+        #获取毕业生的所有就职经历
+        jobs=[]
+        response={}
+        for g in gra_profile:
+            jobs.extend(list(g.user.myjobexp.filter(job_period_end=None)))
+        for j in jobs:
+            if(response[j.job_city]):
+                response[j.job_city]+=1
+            else:
+                response[j.job_city]=1
+        response["msg"]="true"
+        return JsonResponse(response)
+    else:
+        return JsonResponse({"msg":"WM"})
+
+#获取月薪
+@csrf_exempt
+def showsalary(request):
+    if(request.method=="POST"):
+        req=simplejson.loads(request.body)
+        dic=cache.get(req["sessionid"])
+        if dic is None:
+            return JsonResponse({"msg":"expire"})
+        if(dic["username"]!="stu"):
+            return JsonResponse({"msg":"forbid"})
+        #获取指定年份的毕业生
+        if(req["year"]=="total"):
+            try:
+                gra_profile = list(User_Profile_Graduate.objects.all())
+            except Exception as e:
+                gra_profile=[]
+        else:
+            gra_profile=list(User_Profile_Graduate.objects.filter(school_period_end__year=int(req["year"])))
+        #获取毕业生的所有就职经历
+        jobs=[]
+        response={}
+        response["10k"]=0
+        response["10k-30k"]=0
+        response["30k-50k"]=0
+        response["50k"]=0
+        for g in gra_profile:
+            jobs.extend(list(g.user.myjobexp.filter(job_period_end=None)))
+        for j in jobs:
+            if(float(j.job_salary)/12<10000):
+                response["10k"]+=1
+            elif(float(j.job_salary)/12<30000):
+                response["10k-30k"]+=1
+            elif(float(j.job_salary)/12<50000):
+                response["30k-50k"]+=1
+            else:
+                response["50k"]+=1
+        response["msg"]="true"
+        return JsonResponse(response)
+    else:
+        return JsonResponse({"msg":"WM"})
+
+#就业率
+#返回近五年来的就业率
+@csrf_exempt
+def ShoweRateByYear(request):
+    if(request.method=="POST"):
+        req=simplejson.loads(request.body)
+        dic=cache.get(req["sessionid"])
+        if dic is None:
+            return JsonResponse({"msg":"expire"})
+        if(dic["username"]!="stu"):
+            return JsonResponse({"msg":"forbid"})
+        #获取前一年
+        yearnow=datetime.date.today().year
+        response={}
+        response["msg"]="true"
+        for y in range(yearnow-6,yearnow):
+            gra_profile=list(User_Profile_Graduate.objects.filter(school_period_end__year=y))
+            gotjob=0
+            for g in gra_profile:
+                try:
+                    g.myjobexp.all()
+                    gotjob+=1
+                except Exception as e:
+                    print(e)
+            if(len(gra_profile)>0):
+                response[str(y)]=gotjob/len(gra_profile)
+            else:
+                response[str(y)]=0
+    else:
+        return JsonResponse({"msg":"WM"})
+
+#按专业获取就业率
+@csrf_exempt
+def ShoweRateByMajor(request):
+    if(request.method=="POST"):
+        req=simplejson.loads(request.body)
+        dic=cache.get(req["sessionid"])
+        if dic is None:
+            return JsonResponse({"msg":"expire"})
+        if(dic["username"]!="stu"):
+            return JsonResponse({"msg":"forbid"})
+        majors=("临床医学","护理学","汉语言文学","英语","新闻学","广播电视学","广告学","机械设计制造及其自动化","电子信息工程","通信工程","光电信息科学与工程","计算机科学与技术"\
+                ,"土木工程","工业设计","法学","金融学","国际经济与贸易","艺术设计学","视觉传达设计","环境设计","产品设计","公共艺术",\
+                "数字媒体艺术","工商管理","市场营销","会计学","公共事业管理","行政管理")
+        response={}
+        response["msg"]="true"
+        for m in majors:
+            #拿到当前专业的所有profile
+            gra_profile=list(User_Profile_Graduate.objects.filter(major=m))
+            gotjob=0
+            for g in gra_profile:
+                try:
+                    g.myjobexp.all()
+                    gotjob+=1
+                except Exception as e:
+                    print(e)
+            if(len(gra_profile)>0):
+                response[m]=gotjob/len(gra_profile)
+            else:
+                response[m]=0
+    else:
+        return JsonResponse({"msg":"WM"})
+
+#毕业方向
+#按照职位来获取
+@csrf_exempt
+def ShowJobField(request):
+    if (request.method == "POST"):
+        req = simplejson.loads(request.body)
+        dic = cache.get(req["sessionid"])
+        if dic is None:
+            return JsonResponse({"msg": "expire"})
+        if (dic["username"] != "stu"):
+            return JsonResponse({"msg": "forbid"})
+        response = {}
+        response["msg"] = "true"
+        fields={}
+        if (req["year"] == "total"):
+            try:
+                gra_profile = list(User_Profile_Graduate.objects.all())
+            except Exception as e:
+                gra_profile = []
+        else:
+            gra_profile = list(User_Profile_Graduate.objects.filter(school_period_end__year=int(req["year"])))
+        jobs=[]
+        for g in gra_profile:
+            jobs.extend(list(g.user.myjobexp.filter(job_period_end=None)))
+        for j in jobs:
+            if(fields[j.job]):
+                fields[j.job]+=1
+            else:
+                fields[j.job]=1
+        response={}
+        response["fields"]=fields
+        return JsonResponse(response)
+    else:
+        return JsonResponse({"msg": "WM"})

@@ -102,8 +102,8 @@ class User_Profile_Graduate(models.Model):
     living_city = models.CharField("居住城市", max_length=128,null=True,blank=True)
     living_province= models.DateField("居住省份",max_length=128,null=True,blank=True)
     # 时间选择
-    school_period_start = models.DateField("在校时间开始", null=True, blank=True)
-    school_period_end = models.DateField("在校时间结束", null=True, blank=True)
+    school_period_start = models.DateField("开学时间", null=True, blank=True)
+    school_period_end = models.DateField("毕业时间", null=True, blank=True)
     honour=models.TextField("荣誉",max_length=1000,null=True, blank=True)
     self_judgement=models.TextField("自我评价",max_length=1000,null=True, blank=True)
     #下面都是模型的元数据设置,方便管理
