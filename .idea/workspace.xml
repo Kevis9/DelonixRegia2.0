@@ -374,12 +374,12 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/recruit/views.py</url>
-          <line>64</line>
+          <line>65</line>
           <option name="timeStamp" value="231" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/user/views.py</url>
-          <line>647</line>
+          <line>648</line>
           <option name="timeStamp" value="238" />
         </line-breakpoint>
       </breakpoints>
