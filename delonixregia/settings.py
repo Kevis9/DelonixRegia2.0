@@ -1,5 +1,4 @@
-#!python
-#coding:utf-8
+
 """
 Django settings for delonixregia project.
 

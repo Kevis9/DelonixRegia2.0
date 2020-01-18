@@ -2,12 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8e8ee5e5-3c93-4ccb-80cd-601410d0ef87" name="Default" comment="【完善User和招聘,朋友圈接口】">
-      <change beforePath="$PROJECT_DIR$/.idea/delonixregia.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/delonixregia.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/delonixregia/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/delonixregia/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/delonixregia/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/delonixregia/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/delonixregia/wsgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/delonixregia/wsgi.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/friendcircle/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/friendcircle/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/friendcircle/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/friendcircle/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/friendcircle/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/friendcircle/views.py" afterDir="false" />
@@ -367,17 +364,17 @@
       <screen x="0" y="23" width="1440" height="840" />
     </state>
     <state x="229" y="82" key="SettingsEditor/0.23.1440.840@0.23.1440.840" timestamp="1579160179563" />
-    <state x="413" y="275" key="com.intellij.ide.util.TipDialog" timestamp="1579322016071">
+    <state x="413" y="275" key="com.intellij.ide.util.TipDialog" timestamp="1579322935091">
       <screen x="0" y="23" width="1440" height="840" />
     </state>
-    <state x="413" y="275" key="com.intellij.ide.util.TipDialog/0.23.1440.840@0.23.1440.840" timestamp="1579322016071" />
+    <state x="413" y="275" key="com.intellij.ide.util.TipDialog/0.23.1440.840@0.23.1440.840" timestamp="1579322935091" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/recruit/views.py</url>
-          <line>65</line>
+          <line>64</line>
           <option name="timeStamp" value="231" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
