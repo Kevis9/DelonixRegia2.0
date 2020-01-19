@@ -75,7 +75,7 @@ def register(request):
             profile.identity = identity
             profile.email = email
             profile.save()
-            fuser = Friends(user=user, follwby=user)
+            fuser = Friends(user=user, followedby=user)
             fuser.save()
             job=JobExperience(user=user)
             job.save()

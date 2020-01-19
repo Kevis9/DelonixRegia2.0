@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="8e8ee5e5-3c93-4ccb-80cd-601410d0ef87" name="Default" comment="【完善User和招聘,朋友圈接口】">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/templates/verify.html" beforeDir="false" afterPath="$PROJECT_DIR$/user/templates/verify.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/user/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -365,10 +364,10 @@
       <screen x="0" y="23" width="1440" height="840" />
     </state>
     <state x="229" y="82" key="SettingsEditor/0.23.1440.840@0.23.1440.840" timestamp="1579334045203" />
-    <state x="413" y="275" key="com.intellij.ide.util.TipDialog" timestamp="1579417581254">
+    <state x="413" y="275" key="com.intellij.ide.util.TipDialog" timestamp="1579418579196">
       <screen x="0" y="23" width="1440" height="840" />
     </state>
-    <state x="413" y="275" key="com.intellij.ide.util.TipDialog/0.23.1440.840@0.23.1440.840" timestamp="1579417581254" />
+    <state x="413" y="275" key="com.intellij.ide.util.TipDialog/0.23.1440.840@0.23.1440.840" timestamp="1579418579196" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
