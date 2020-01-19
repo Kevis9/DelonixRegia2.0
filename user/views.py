@@ -201,7 +201,11 @@ def log_in(request):
     if request.method=="POST":
         # str=request.META.get("HTTP_SESSIONID")
         msg = 'true'
-        req=simplejson.loads(request.body)
+        try:
+            print(request.body)
+            req=simplejson.loads(request.body)
+        except Exception as e:
+            print(e)
         username=req['username']
         password=req['password']
         try:
