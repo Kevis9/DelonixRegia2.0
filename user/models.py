@@ -91,23 +91,27 @@ class User_Profile_Graduate(models.Model):
     #基本信息
     identity=models.CharField("用户身份",max_length=128,choices=user_identity,default='1')
     imgurl = models.CharField("头像url", max_length=1000, null=True, blank=True)
-    phonenumber=models.CharField('电话号码', max_length=128,null=True,blank=True)
+    phonenum=models.CharField('电话号码', max_length=128, null=True, blank=True)
     name=models.CharField('姓名', max_length=128,null=True,blank=True)
     gender = models.CharField('性别', max_length=128,choices=male_choices,null=True,blank=True)
-    age = models.CharField("年龄", max_length=128,null=True,blank=True)
+    # age = models.CharField("年龄", max_length=128,null=True,blank=True)
     major = models.CharField("专业", max_length=128,null=True,blank=True)
     email = models.EmailField("邮件",max_length=128,null=True,blank=True)
-    birth_data=models.DateField("出生日期",null=True,blank=True)
-    education_background=models.CharField("学历",max_length=128,choices=education_backgroud_choices,null=True,blank=True)
-    university=models.CharField("所在学校", max_length=128,null=True,blank=True)
+    birth_date=models.DateField("出生日期", null=True, blank=True)
+    # education_background=models.CharField("学历",max_length=128,choices=education_backgroud_choices,null=True,blank=True)
+    # university=models.CharField("所在学校", max_length=128,null=True,blank=True)
     #对于城市这一块要搞一个城市的选择器
-    living_city = models.CharField("居住城市", max_length=128,null=True,blank=True)
-    living_province= models.DateField("居住省份",max_length=128,null=True,blank=True)
+    # living_city = models.CharField("居住城市", max_length=128,null=True,blank=True)
+    # living_province= models.DateField("居住省份",max_length=128,null=True,blank=True)
     # 时间选择
-    school_period_start = models.DateField("开学时间", null=True, blank=True)
-    school_period_end = models.DateField("毕业时间", null=True, blank=True)
-    honour=models.TextField("荣誉",max_length=1000,null=True, blank=True)
-    self_judgement=models.TextField("自我评价",max_length=1000,null=True, blank=True)
+    admission_date = models.DateField("入校时间", null=True, blank=True)
+    graduate_date = models.DateField("毕业时间", null=True, blank=True)
+    # honour=models.TextField("荣誉",max_length=1000,null=True, blank=True)
+    # self_judgement=models.TextField("自我评价",max_length=1000,null=True, blank=True)
+    stunum = models.CharField("学号",max_length=15,null=True,blank=True)
+    institute = models.CharField("学院",max_length=20,null=True,blank=True)
+    gpa = models.FloatField("gpa总评",null=True,blank=True)
+    coin = models.IntegerField(null=True,blank=False)   #积分硬币
     #下面都是模型的元数据设置,方便管理
     class Meta:
         verbose_name = "毕业生信息"
@@ -126,11 +130,11 @@ class User_Profile_Stu(models.Model):
         ('M', '男'),
         ('F', '女')
     )
-    user_identity = (
-        ('1', '毕业生'),
-        ('2', '在校生'),
-        ('3', '企业账号'),
-    )
+    # user_identity = (
+    #     ('1', '毕业生'),
+    #     ('2', '管理员'),
+    #     ('3', '企业账号'),
+    # )
     education_backgroud_choices = (
         ('U', '本科生'),
         ('M', '硕士'),
@@ -142,7 +146,7 @@ class User_Profile_Stu(models.Model):
     imgurl = models.CharField("头像url", max_length=1000, null=True, blank=True)
     living_province = models.CharField("居住省份", max_length=128, null=True, blank=True)
     living_city = models.CharField("居住城市", max_length=128, null=True, blank=True)
-    identity=models.CharField("用户身份",max_length=128,choices=user_identity,default='2')
+    # identity=models.CharField("用户身份",max_length=128,choices=user_identity,default='2')
     phonenumber=models.CharField('电话号码', max_length=128,null=True,blank=True)
     name=models.CharField('姓名', max_length=128,null=True,blank=True)
     gender = models.CharField('性别', max_length=128,choices=male_choices,null=True,blank=True)

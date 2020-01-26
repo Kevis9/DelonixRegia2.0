@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8e8ee5e5-3c93-4ccb-80cd-601410d0ef87" name="Default" comment="【完善User和招聘,朋友圈接口】">
+      <change afterPath="$PROJECT_DIR$/user/migrations/0004_auto_20200126_1455.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/user/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -364,10 +367,14 @@
       <screen x="0" y="23" width="1440" height="840" />
     </state>
     <state x="229" y="82" key="SettingsEditor/0.23.1440.840@0.23.1440.840" timestamp="1579334045203" />
-    <state x="413" y="275" key="com.intellij.ide.util.TipDialog" timestamp="1579418579196">
+    <state x="413" y="275" key="com.intellij.ide.util.TipDialog" timestamp="1580050666076">
       <screen x="0" y="23" width="1440" height="840" />
     </state>
-    <state x="413" y="275" key="com.intellij.ide.util.TipDialog/0.23.1440.840@0.23.1440.840" timestamp="1579418579196" />
+    <state x="413" y="275" key="com.intellij.ide.util.TipDialog/0.23.1440.840@0.23.1440.840" timestamp="1580050666076" />
+    <state x="640" y="113" key="scopes" timestamp="1580049990928">
+      <screen x="0" y="23" width="1440" height="840" />
+    </state>
+    <state x="640" y="113" key="scopes/0.23.1440.840@0.23.1440.840" timestamp="1580049990928" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -391,20 +398,5 @@
         </breakpoint>
       </default-breakpoints>
     </breakpoint-manager>
-  </component>
-  <component name="masterDetails">
-    <states>
-      <state key="ScopeChooserConfigurable.UI">
-        <settings>
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-    </states>
   </component>
 </project>

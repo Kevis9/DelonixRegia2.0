@@ -74,7 +74,7 @@ def register(request):
                 profile = User_Profile_Company(user=user)
             profile.identity = identity
             profile.email = email
-            profile.save()
+            profile.save() 
             fuser = Friends(user=user, followedby=user)
             fuser.save()
             job=JobExperience(user=user)
@@ -353,16 +353,16 @@ def update_profile(request):
                         # 因为字典的内容和model可能对不上，故不用此函数
                         # userprofile.update(**req)
                         userprofile.age = req["age"]
-                        userprofile.birth_data = req["birth_data"]
+                        userprofile.birth_data = req["birth_date"]
                         userprofile.major = req["major"]
                         userprofile.education_backgroud = req["education_backgroud"]
                         userprofile.university = req["university"]
                         userprofile.living_city = req["living_city"]
                         userprofile.living_provice=req["living_provice"]
                         userprofile.email = req["email"]
-                        userprofile.phonenumber = req["phonenumber"]
-                        userprofile.school_period_start = req["school_period_start"]
-                        userprofile.school_period_end = req["school_period_end"]
+                        userprofile.phonenumber = req["phonenum"]
+                        userprofile.school_period_start = req["admission_date"]
+                        userprofile.school_period_end = req["graduate_date"]
                     if block=="2":
                         if req["add"]=="1":
                             education_e = EducationExperience(user=user)
@@ -403,7 +403,7 @@ def update_profile(request):
             if identity == '3':
                 try:
                     userprofile = User_Profile_Company.objects.get(user=user)
-                    userprofile.phonenumber=req["phonenumber"]
+                    userprofile.phonenumber=req["phonenum"]
                     userprofile.name=req["name"]
                     userprofile.email=req["email"]
                     # 头像
