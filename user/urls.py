@@ -59,7 +59,9 @@ urlpatterns=[
     #查看方向
     path('ShowJobField',views.ShowJobField,name='ShowJobField'),
     #查看薪水
-    path('showsalary',views.showsalary,name="showsalary")
+    path('showsalary',views.showsalary,name="showsalary"),
+    #查看升学情况
+    path('ShowFurtherEducation/',views.ShowFurtherEducation,name="ShowFurtherEducation")
 
 ]
 

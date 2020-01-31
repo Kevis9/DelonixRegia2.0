@@ -122,6 +122,13 @@ class User_Profile_Graduate(models.Model):
     def get_absolute_url(self):
         return reverse('get_profile_graduate', args=[self.user.id])
         #但是推荐用上面的
+#毕业生的深造表
+class FurtherEducation(models.Model):
+    # 深造国家筛选的时候只有两类：中国和其他国家
+    country=models.CharField("深造的国家",max_length=128,null=True,blank=True)
+    major=models.CharField("深造的专业",max_length=128,null=True,blank=True)
+    School_name=models.CharField("深造的学校的名称",max_length=128,null=True,blank=True)
+    FurEdu_time=models.DateField("深造的时间",max_length=128,null=True,blank=True)
 
 #在校生
 class User_Profile_Stu(models.Model):

@@ -1,13 +1,13 @@
 from django.contrib import admin
 
 from django.contrib import admin
-from .models import JobExperience,\
-    User_Profile_Graduate,\
-    User_Profile_Stu,\
-    User_Profile_Company,\
-    EducationExperience,\
-    Friends,Message,Company_Resume,Graduate_Resume
-
+from .models import JobExperience, \
+    User_Profile_Graduate, \
+    User_Profile_Stu, \
+    User_Profile_Company, \
+    EducationExperience, \
+    Friends, Message, Company_Resume, Graduate_Resume, \
+    FurtherEducation
 
 # Register your models here.
 admin.site.register(JobExperience)
@@ -19,6 +19,4 @@ admin.site.register(Friends)
 admin.site.register(Message)
 admin.site.register(Company_Resume)
 admin.site.register(Graduate_Resume)
-
-
-
+admin.site.register(FurtherEducation)
