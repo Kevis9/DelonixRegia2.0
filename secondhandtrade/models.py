@@ -1,3 +1,5 @@
+#!/usr/bin/python
+#coding=utf-8
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -9,7 +11,6 @@ class SecondHandTrade(models.Model):
         ('W',"想要"),
         ("S","出售")
     )
-
     #帖子的id是django自己加的一个AutoField
     user=models.ForeignKey(User,on_delete=models.CASCADE,null=True)
     title=models.CharField("标题",max_length=50,null=True,blank=True)

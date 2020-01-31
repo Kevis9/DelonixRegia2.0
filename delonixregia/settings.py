@@ -1,3 +1,5 @@
+#!/usr/bin/python
+#coding=utf-8
 """
 Django settings for delonixregia project.
 
@@ -42,7 +44,6 @@ INSTALLED_APPS = [
     'secondhandtrade.apps.SecondhandtradeConfig',
     'recruit.apps.RecruitConfig',
     'corsheaders'
-
 ]
 
 MIDDLEWARE = [
@@ -77,10 +78,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'delonixregia.wsgi.application'
 
-ALLOWED_HOSTS=['172.16.32.1']
+ALLOWED_HOSTS=['*']
+
+#数据库设置
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-
 #DATABASES = {
 #    'default': {
 #    'ENGINE': 'django.db.backends.mysql',
@@ -93,6 +95,7 @@ ALLOWED_HOSTS=['172.16.32.1']
 #    }
 #}
 
+#默认使用SQlite
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -136,10 +139,8 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
-
 
 
 # 邮件配置
@@ -155,9 +156,9 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 #解决跨域问题 cors
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = (
-    'localhost:8080',
-)
+# CORS_ORIGIN_WHITELIST = (
+#     'localhost:8080',
+# )
 CORS_ALLOW_METHODS = (
     'DELETE',
     'GET',
@@ -189,6 +190,9 @@ ALLOWED_HOSTS = ['*']
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+#设置session在session表中的期限,默认为2周,超过之后key就会被删除,重新随机生成
+# SESSION_COOKIE_AGE = 30
 
 #Cache设置 利用数据库存储cache,memcached暂时先不考虑
 CACHES = {

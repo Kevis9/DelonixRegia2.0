@@ -1,3 +1,5 @@
+#!/usr/bin/python
+#coding=utf-8
 from django.urls import path,re_path
 from django.conf import settings
 from django.conf.urls.static import static
@@ -8,6 +10,8 @@ urlpatterns=[
     path("uploadpost/",views.uploadpost),
     #发布评论
     path("uploadcomment/",views.uploadcomment),
+    #删除评论
+    path("deletecomment/",views.deletecomment),
     #获得所有的帖子
     path("getallpost/",views.getallpost),
     #点赞
