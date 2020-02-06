@@ -450,7 +450,7 @@ def follw(request):
                 fuser = User.objects.get(id=fid)
                 tmp = list(Friends.objects.filter(user=fuser))
                 if (len(tmp) == 0):
-                    # friend=Friends(user=fuser) 这样写应该只是在内存中创建，不再表中创建
+                    # friend=Friends(user=fuser) 这样写应该只是在内存中创建，不再表中创建,在friend.save()就好
                     friend = Friends.objects.create(user=fuser)
                     print(friend.id)
                 else:

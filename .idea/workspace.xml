@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8e8ee5e5-3c93-4ccb-80cd-601410d0ef87" name="Default" comment="">
+    <list default="true" id="8e8ee5e5-3c93-4ccb-80cd-601410d0ef87" name="Default" comment="用comman命令添加数据，然后增加了数据库的字段，但是没有迁移">
+      <change afterPath="$PROJECT_DIR$/user/management/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/user/management/commands/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/user/management/commands/_private.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/user/management/commands/adddata.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/delonixregia/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/delonixregia/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/migrations/0001_initial.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/migrations/0002_auto_20190831_1217.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/migrations/0003_auto_20190831_1328.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/migrations/0004_auto_20200126_1455.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/migrations/0005_remove_user_profile_stu_identity.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/user/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/user/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/views.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -17,6 +25,13 @@
   </component>
   <component name="FavoritesManager">
     <favorites_list name="DelonixRegia2.0" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="PUSH_TAGS">
@@ -41,7 +56,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="full.screen.before.presentation.mode" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.completion" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -183,9 +198,9 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="/usr/local/Cellar/python/3.7.5/bin/python3" />
+      <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/manage.py" />
@@ -305,7 +320,14 @@
       <option name="project" value="LOCAL" />
       <updated>1580468932918</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="编写了深造表，和绑定与你毕业生信息表的1对多关系，没有迁移">
+      <created>1580506443681</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1580506443681</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -334,7 +356,8 @@
     <MESSAGE value="【完善朋友圈】" />
     <MESSAGE value="【完善User和招聘,朋友圈接口】" />
     <MESSAGE value="希望是可以开始代码编写了，我太难了" />
-    <option name="LAST_COMMIT_MESSAGE" value="希望是可以开始代码编写了，我太难了" />
+    <MESSAGE value="编写了深造表，和绑定与你毕业生信息表的1对多关系，没有迁移" />
+    <option name="LAST_COMMIT_MESSAGE" value="编写了深造表，和绑定与你毕业生信息表的1对多关系，没有迁移" />
   </component>
   <component name="WindowStateProjectService">
     <state x="184" y="105" key="#com.intellij.execution.impl.EditConfigurationsDialog" />
