@@ -7,7 +7,7 @@ from .models import User_Profile_Stu, \
     User_Profile_Graduate, \
     User_Profile_Company, JobExperience, \
     EducationExperience, Friends, Message, Company_Resume, \
-    Graduate_Resume, FurtherEducation
+    Graduate_Resume, FurtherEducation, Employment
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token, rotate_token
 from django.core.mail import send_mail, send_mass_mail, EmailMultiAlternatives
@@ -1054,7 +1054,7 @@ def ShowJobField(request):
 
 
 # 升学情况
-# 安装学院信息或是专业信息请求，已经登陆进入系统
+# 按照学院信息或是专业信息请求，已经登陆进入系统
 @csrf_exempt
 @require_http_methods(["POST"])
 def ShowFurtherEducation(request):
@@ -1092,10 +1092,10 @@ def ShowFurtherEducation(request):
                             schooldetail[uu.uvty_name] = 1;
                         if uu.major in majordetail:
                             # 在专业上已经在里面就加上一
-                            majordetail[uu.major]=majordetail[uu.major]+1;
+                            majordetail[uu.major] = majordetail[uu.major] + 1;
                         else:
                             # 专业不在里面就创建
-                            majordetail[uu.major]=1;
+                            majordetail[uu.major] = 1;
 
             except Exception as e:
                 print(e)
@@ -1146,3 +1146,101 @@ def ShowFurtherEducation(request):
     response['major_detail'] = major_detail
     return JsonResponse(response)
 
+
+# 毕业生平均工资情况
+@csrf_exempt
+@require_http_methods(["POST"])
+def ShowAverageSalary(request):
+    # response={}
+    req = simplejson.loads(request.body)
+    print(req)
+    flag = req["flag"]
+    average = 0  # 表示工资
+    number = 0  # 表示人数
+    if flag == 1:
+        # 代表学院
+        institute = req["college"]
+        users = list(User_Profile_Graduate.objects.filter(institute=institute))
+        print(users)
+        for u in users:
+            # print(u)
+            try:
+                eyploy = list(Employment.objects.filter(uid=u.user.id))
+                if eyploy:
+                    number = number + 1
+                    for uu in eyploy:
+                        average = average + uu.salary
+            except Exception as e:
+                print(e)
+    if flag == 2:
+        # 代表专业
+        major = req["major"]
+        users = list(User_Profile_Graduate.objects.filter(major=major))
+        print(users)
+        for u in users:
+            # print(u)
+            try:
+                eyploy = list(Employment.objects.filter(uid=u.user.id))
+                if eyploy:
+                    number = number + 1
+                    for uu in eyploy:
+                        average = average + uu.salary
+            except Exception as e:
+                print(e)
+    return JsonResponse({"average_salary": round(average / number, 2)})
+
+
+# 查看毕业生进入500强企业的情况
+@csrf_exempt
+@require_http_methods(["POST"])
+def ShowTop500(request):
+    req = simplejson.loads(request.body)
+    print(req)
+    flag = req["flag"]
+    number=0;#进入500强企业的人数
+    top500={}
+    top_500=[]
+    if flag == 1:
+        # 代表学院
+        institute = req["college"]
+        users = list(User_Profile_Graduate.objects.filter(institute=institute))
+        print(users)
+        for u in users:
+            # print(u)
+            try:
+                eyploy = list(Employment.objects.filter(uid=u.user.id))
+                if eyploy:
+                    for u in eyploy:
+                        if u.istop500:
+                            # print(u.istop500)
+                            number = number + 1
+                            if u.company_name in top500:
+                                # print(u.company_name)
+                                top500[u.company_name]=top500[u.company_name]+1
+                            else:
+                                top500[u.company_name]=1
+            except Exception as e:
+                print(e)
+    if flag == 2:
+        # 代表专业
+        major = req["major"]
+        users = list(User_Profile_Graduate.objects.filter(major=major))
+        print(users)
+        for u in users:
+            print(u)
+            try:
+                eyploy = list(Employment.objects.filter(uid=u.user.id))
+                if eyploy:
+                    for u in eyploy:
+                        # print(u.istop500)
+                        if u.istop500:
+                            number = number + 1
+                            if u.company_name in top500:
+                                top500[u.company_name] = top500[u.company_name] + 1
+                            else:
+                                top500[u.company_name] = 1
+            except Exception as e:
+                print(e)
+    for u in top500.keys():
+        top_500.append({"company":u, "num":top500[u]})
+    return JsonResponse({"number":number,"top_500":top_500})
