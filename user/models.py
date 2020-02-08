@@ -164,8 +164,8 @@ class FurtherEducation(models.Model):
     country = models.CharField("深造的国家", max_length=20, null=True, blank=True)
     major = models.CharField("深造的专业", max_length=20, null=True, blank=True)
     uvty_name = models.CharField("深造的学校的名称", max_length=20, null=True, blank=True)
-    # FurEdu_time = models.DateField("深造的时间", max_length=128, null=True, blank=True)#以年为单位
-    admission_date = models.IntegerField("深造的时间",null=True, blank=True)  # 以年为单位
+    admission_date= models.DateField("深造的时间", max_length=128, null=True, blank=True)
+    # admission_date = models.IntegerField("深造的时间",null=True, blank=True)  # 以年为单位
 
     class Meta:
         verbose_name = '毕业生简历表'
@@ -181,7 +181,11 @@ class Employment(models.Model):
     country = models.CharField("就业国家", max_length=20, null=True, blank=True)
     province = models.CharField("就业省份", max_length=20, null=True, blank=True)
     city = models.CharField("就业城市", max_length=20, null=True, blank=True)
-    birth_data = models.IntegerField("就业时间", blank=True)
+    employ_date= models.DateField("就业时间", max_length=128, null=True, blank=True)
+
+
+    class Meta:
+        verbose_name = '毕业生就业表'
 
 
 # 在校生

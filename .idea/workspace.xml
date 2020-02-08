@@ -2,18 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8e8ee5e5-3c93-4ccb-80cd-601410d0ef87" name="Default" comment="用comman命令添加数据，然后增加了数据库的字段，但是没有迁移">
-      <change afterPath="$PROJECT_DIR$/user/management/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/user/management/commands/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/user/management/commands/_private.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/user/management/commands/adddata.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/user/migrations/0001_initial.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/delonixregia/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/delonixregia/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/migrations/0002_auto_20190831_1217.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/migrations/0003_auto_20190831_1328.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/migrations/0004_auto_20200126_1455.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/migrations/0005_remove_user_profile_stu_identity.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/management/commands/adddata.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/management/commands/adddata.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/user/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/user/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/views.py" afterDir="false" />
     </list>
@@ -327,7 +319,14 @@
       <option name="project" value="LOCAL" />
       <updated>1580506443681</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="用comman命令添加数据，然后增加了数据库的字段，但是没有迁移">
+      <created>1580981817988</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1580981817988</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -357,7 +356,8 @@
     <MESSAGE value="【完善User和招聘,朋友圈接口】" />
     <MESSAGE value="希望是可以开始代码编写了，我太难了" />
     <MESSAGE value="编写了深造表，和绑定与你毕业生信息表的1对多关系，没有迁移" />
-    <option name="LAST_COMMIT_MESSAGE" value="编写了深造表，和绑定与你毕业生信息表的1对多关系，没有迁移" />
+    <MESSAGE value="用comman命令添加数据，然后增加了数据库的字段，但是没有迁移" />
+    <option name="LAST_COMMIT_MESSAGE" value="用comman命令添加数据，然后增加了数据库的字段，但是没有迁移" />
   </component>
   <component name="WindowStateProjectService">
     <state x="184" y="105" key="#com.intellij.execution.impl.EditConfigurationsDialog" />
@@ -402,7 +402,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/user/views.py</url>
-          <line>667</line>
+          <line>674</line>
           <option name="timeStamp" value="238" />
         </line-breakpoint>
       </breakpoints>

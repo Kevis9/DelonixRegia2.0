@@ -7,7 +7,7 @@ from .models import User_Profile_Stu, \
     User_Profile_Graduate, \
     User_Profile_Company, JobExperience, \
     EducationExperience, Friends, Message, Company_Resume, \
-    Graduate_Resume
+    Graduate_Resume, FurtherEducation
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token, rotate_token
 from django.core.mail import send_mail, send_mass_mail, EmailMultiAlternatives
@@ -28,6 +28,13 @@ import shutil
 import datetime
 
 localurl = "http://172.16.3.61:8000"
+
+majors = (
+    "临床医学", "护理学", "汉语言文学", "英语", "新闻学", "广播电视学", "广告学", "机械设计制造及其自动化", "电子信息工程", "通信工程", "光电信息科学与工程", "计算机科学与技术" \
+        , "土木工程", "工业设计", "法学", "金融学", "国际经济与贸易", "艺术设计学", "视觉传达设计", "环境设计", "产品设计", "公共艺术", \
+    "数字媒体艺术", "工商管理", "市场营销", "会计学", "公共事业管理", "行政管理")
+
+college = ("工学院", "商学院", "理学院", "法学院", "文学院", "长江艺术与设计学院", "医学院", "长江新闻与传播学院")
 
 
 # 生成随机字符串
@@ -986,9 +993,10 @@ def ShoweRateByMajor(request):
         if (dic["username"] != "stu"):
             return JsonResponse({"msg": "forbid"})
         majors = (
-        "临床医学", "护理学", "汉语言文学", "英语", "新闻学", "广播电视学", "广告学", "机械设计制造及其自动化", "电子信息工程", "通信工程", "光电信息科学与工程", "计算机科学与技术" \
-            , "土木工程", "工业设计", "法学", "金融学", "国际经济与贸易", "艺术设计学", "视觉传达设计", "环境设计", "产品设计", "公共艺术", \
-        "数字媒体艺术", "工商管理", "市场营销", "会计学", "公共事业管理", "行政管理")
+            "临床医学", "护理学", "汉语言文学", "英语", "新闻学", "广播电视学", "广告学", "机械设计制造及其自动化", "电子信息工程", "通信工程", "光电信息科学与工程",
+            "计算机科学与技术" \
+                , "土木工程", "工业设计", "法学", "金融学", "国际经济与贸易", "艺术设计学", "视觉传达设计", "环境设计", "产品设计", "公共艺术", \
+            "数字媒体艺术", "工商管理", "市场营销", "会计学", "公共事业管理", "行政管理")
         response = {}
         response["msg"] = "true"
         for m in majors:
@@ -1050,45 +1058,91 @@ def ShowJobField(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def ShowFurtherEducation(request):
-    # response={} #字典
-    # response["msg"]={}
+    response = {}  # 字典
     req = simplejson.loads(request.body)
     print(request.body)
     flag = req["flag"]
+    m1 = 0;  # 该学院中毕业中深造的人数
+    m2 = 0;  # 该学院中毕业中深造的人数中去国外的人数
+    schooldetail = {}  # 表示有的学校的名字，用键值来判断是否重复
+    school_detail = []  # 表示有的学校
+    majordetail = {}  # 表示有的专业的名字，用键值来判断是否重复
+    major_detail = []  # 表示有的专业的名字,集合不重复
     if flag == 1:
-        return JsonResponse({"msg": "college"})
-    if flag == 2:
-        return JsonResponse({"msg": "major"})
+        # 代表学院
+        institute = req["college"]
+        users = list(User_Profile_Graduate.objects.filter(institute=institute))
+        print(len(users))
+        for u in users:
+            # print(u)
+            try:
+                edf = list(FurtherEducation.objects.filter(uid=u.user.id))
+                if edf:
+                    # print(edf)
+                    # print(edf[0].country)
+                    m1 = m1 + 1;
+                    for uu in edf:
+                        if uu.country != '中国':
+                            m2 = m2 + 1;
+                        if (uu.uvty_name in schooldetail):
+                            # 在学校已经在里面就加上一
+                            schooldetail[uu.uvty_name] = schooldetail[uu.uvty_name] + 1
+                        else:
+                            # 学校不在里面就创建
+                            schooldetail[uu.uvty_name] = 1;
+                        if uu.major in majordetail:
+                            # 在专业上已经在里面就加上一
+                            majordetail[uu.major]=majordetail[uu.major]+1;
+                        else:
+                            # 专业不在里面就创建
+                            majordetail[uu.major]=1;
 
-# college
-# flag
-# sessionid = req["sessionid"]
-#     dic = cache.get(sessionid)
-#     if dic is None:
-#         return JsonResponse({"msg": "expire"})
-#     is_login = dic["is_login"]
-#     username = dic["username"]
-# 我要验证用户吗？
-# cache是哪里的缓存
-# 用于验证是吗？是的话，记得改文档
-# 考不考虑flag的错误，没必要吧
-# 学院的范围
-#标志信息
-# {
-#     "promotion_rate": 34.24,
-#     "abroad_rate":10.58,
-#     school_detail":[
-#         {"school":"深圳大学"，
-#         "num":"3",
-#         }，
-#         {"school":"哈佛大学"，
-#         "num":"1"
-#         }
-#     ],
-#     "major_detail":[
-#         {
-#             "major":"计算机科学技术",
-#             "num":"2"
-#         }
-#     ]
-#   }
+            except Exception as e:
+                print(e)
+    if flag == 2:
+        # 代表专业
+        major = req["major"]
+        users = list(User_Profile_Graduate.objects.filter(major=major))
+        print(len(users))
+        for u in users:
+            # print(u)
+            try:
+                edf = list(FurtherEducation.objects.filter(uid=u.user.id))
+                if edf:
+                    # print(edf)
+                    # print(edf[0].country)
+                    m1 = m1 + 1;
+                    for uu in edf:
+                        if uu.country != '中国':
+                            m2 = m2 + 1;
+                        if (uu.uvty_name in schooldetail):
+                            # 在学校已经在里面就加上一
+                            schooldetail[uu.uvty_name] = schooldetail[uu.uvty_name] + 1
+                        else:
+                            # 学校不在里面就创建
+                            schooldetail[uu.uvty_name] = 1;
+                        if uu.major in majordetail:
+                            # 在专业上已经在里面就加上一
+                            majordetail[uu.major] = majordetail[uu.major] + 1;
+                        else:
+                            # 专业不在里面就创建
+                            majordetail[uu.major] = 1;
+
+            except Exception as e:
+                print(e)
+    print(m1)
+    print(m2)
+    print(schooldetail)
+    print(majordetail)
+    for n in schooldetail.keys():
+        # 把字典放到数组里面
+        school_detail.append({"school": n, "number": str(schooldetail[n])})
+    for n in majordetail.keys():
+        major_detail.append({"major": n, "num": str(majordetail[n])})
+
+    response['promotion_rate'] = round(m1 * 100 / len(users), 2)
+    response['abroad_rate'] = round(m2 * 100 / len(users), 2)
+    response['school_detail'] = school_detail
+    response['major_detail'] = major_detail
+    return JsonResponse(response)
+
