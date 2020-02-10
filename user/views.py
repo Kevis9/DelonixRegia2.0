@@ -1056,95 +1056,104 @@ def ShowJobField(request):
 # 升学情况
 # 按照学院信息或是专业信息请求，已经登陆进入系统
 @csrf_exempt
-@require_http_methods(["POST"])
+# @require_http_methods(["POST"])
 def ShowFurtherEducation(request):
-    response = {}  # 字典
-    req = simplejson.loads(request.body)
-    print(request.body)
-    flag = req["flag"]
-    m1 = 0;  # 该学院中毕业中深造的人数
-    m2 = 0;  # 该学院中毕业中深造的人数中去国外的人数
-    schooldetail = {}  # 表示有的学校的名字，用键值来判断是否重复
-    school_detail = []  # 表示有的学校
-    majordetail = {}  # 表示有的专业的名字，用键值来判断是否重复
-    major_detail = []  # 表示有的专业的名字,集合不重复
-    if flag == 1:
+    if (request.method == "POST"):
+        req = simplejson.loads(request.body)
+        dic = cache.get(req["sessionid"])
+        if dic is None:
+            return JsonResponse({"msg":0})
+        response = {}  # 字典
+        req = simplejson.loads(request.body)
+        print(request.body)
+        flag = req["flag"]
+        m1 = 0;  # 该学院中毕业中深造的人数
+        m2 = 0;  # 该学院中毕业中深造的人数中去国外的人数
+        schooldetail = {}  # 表示有的学校的名字，用键值来判断是否重复
+        school_detail = []  # 表示有的学校
+        majordetail = {}  # 表示有的专业的名字，用键值来判断是否重复
+        major_detail = []  # 表示有的专业的名字,集合不重复
+        if flag == 1:
         # 代表学院
-        institute = req["college"]
-        users = list(User_Profile_Graduate.objects.filter(institute=institute))
-        print(len(users))
-        for u in users:
-            # print(u)
-            try:
-                edf = list(FurtherEducation.objects.filter(uid=u.user.id))
-                if edf:
-                    # print(edf)
-                    # print(edf[0].country)
-                    m1 = m1 + 1;
-                    for uu in edf:
-                        if uu.country != '中国':
-                            m2 = m2 + 1;
-                        if (uu.uvty_name in schooldetail):
+            institute = req["college"]
+            users = list(User_Profile_Graduate.objects.filter(institute=institute))
+            print(len(users))
+            for u in users:
+                # print(u)
+                try:
+                    edf = list(FurtherEducation.objects.filter(uid=u.user.id))
+                    if edf:
+                        # print(edf)
+                        # print(edf[0].country)
+                        m1 = m1 + 1;
+                        for uu in edf:
+                            if uu.country != '中国':
+                                m2 = m2 + 1;
+                            if (uu.uvty_name in schooldetail):
                             # 在学校已经在里面就加上一
-                            schooldetail[uu.uvty_name] = schooldetail[uu.uvty_name] + 1
-                        else:
+                                schooldetail[uu.uvty_name] = schooldetail[uu.uvty_name] + 1
+                            else:
                             # 学校不在里面就创建
-                            schooldetail[uu.uvty_name] = 1;
-                        if uu.major in majordetail:
+                                schooldetail[uu.uvty_name] = 1;
+                            if uu.major in majordetail:
                             # 在专业上已经在里面就加上一
-                            majordetail[uu.major] = majordetail[uu.major] + 1;
-                        else:
+                                majordetail[uu.major] = majordetail[uu.major] + 1;
+                            else:
                             # 专业不在里面就创建
-                            majordetail[uu.major] = 1;
+                                majordetail[uu.major] = 1;
 
-            except Exception as e:
-                print(e)
-    if flag == 2:
+                except Exception as e:
+                    print(e)
+        if flag == 2:
         # 代表专业
-        major = req["major"]
-        users = list(User_Profile_Graduate.objects.filter(major=major))
-        print(len(users))
-        for u in users:
+            major = req["major"]
+            users = list(User_Profile_Graduate.objects.filter(major=major))
+            print(len(users))
+            for u in users:
             # print(u)
-            try:
-                edf = list(FurtherEducation.objects.filter(uid=u.user.id))
-                if edf:
+                try:
+                    edf = list(FurtherEducation.objects.filter(uid=u.user.id))
+                    if edf:
                     # print(edf)
                     # print(edf[0].country)
-                    m1 = m1 + 1;
-                    for uu in edf:
-                        if uu.country != '中国':
-                            m2 = m2 + 1;
-                        if (uu.uvty_name in schooldetail):
+                        m1 = m1 + 1;
+                        for uu in edf:
+                            if uu.country != '中国':
+                                m2 = m2 + 1;
+                            if (uu.uvty_name in schooldetail):
                             # 在学校已经在里面就加上一
-                            schooldetail[uu.uvty_name] = schooldetail[uu.uvty_name] + 1
-                        else:
+                                schooldetail[uu.uvty_name] = schooldetail[uu.uvty_name] + 1
+                            else:
                             # 学校不在里面就创建
-                            schooldetail[uu.uvty_name] = 1;
-                        if uu.major in majordetail:
+                                schooldetail[uu.uvty_name] = 1;
+                            if uu.major in majordetail:
                             # 在专业上已经在里面就加上一
-                            majordetail[uu.major] = majordetail[uu.major] + 1;
-                        else:
+                                majordetail[uu.major] = majordetail[uu.major] + 1;
+                            else:
                             # 专业不在里面就创建
-                            majordetail[uu.major] = 1;
+                                majordetail[uu.major] = 1;
 
-            except Exception as e:
-                print(e)
-    print(m1)
-    print(m2)
-    print(schooldetail)
-    print(majordetail)
-    for n in schooldetail.keys():
+                except Exception as e:
+                    print(e)
+        print(m1)
+        print(m2)
+        print(schooldetail)
+        print(majordetail)
+        for n in schooldetail.keys():
         # 把字典放到数组里面
-        school_detail.append({"school": n, "number": str(schooldetail[n])})
-    for n in majordetail.keys():
-        major_detail.append({"major": n, "num": str(majordetail[n])})
+            school_detail.append({"school": n, "number": str(schooldetail[n])})
+        for n in majordetail.keys():
+            major_detail.append({"major": n, "num": str(majordetail[n])})
+        response['msg']=1;
+        response['promotion_rate'] = round(m1 * 100 / len(users), 2)
+        response['abroad_rate'] = round(m2 * 100 / len(users), 2)
+        response['school_detail'] = school_detail
+        response['major_detail'] = major_detail
+        return JsonResponse(response)
+    else:
+        return JsonResponse({"msg":2})
 
-    response['promotion_rate'] = round(m1 * 100 / len(users), 2)
-    response['abroad_rate'] = round(m2 * 100 / len(users), 2)
-    response['school_detail'] = school_detail
-    response['major_detail'] = major_detail
-    return JsonResponse(response)
+
 
 
 # 毕业生平均工资情况
@@ -1152,95 +1161,109 @@ def ShowFurtherEducation(request):
 @require_http_methods(["POST"])
 def ShowAverageSalary(request):
     # response={}
-    req = simplejson.loads(request.body)
-    print(req)
-    flag = req["flag"]
-    average = 0  # 表示工资
-    number = 0  # 表示人数
-    if flag == 1:
-        # 代表学院
-        institute = req["college"]
-        users = list(User_Profile_Graduate.objects.filter(institute=institute))
-        print(users)
-        for u in users:
+    if (request.method == "POST"):
+        req = simplejson.loads(request.body)
+        dic = cache.get(req["sessionid"])
+        if dic is None:
+            return JsonResponse({"msg":0})
+        req = simplejson.loads(request.body)
+        print(req)
+        flag = req["flag"]
+        average = 0  # 表示工资
+        number = 0  # 表示人数
+        if flag == 1:
+            # 代表学院
+            institute = req["college"]
+            users = list(User_Profile_Graduate.objects.filter(institute=institute))
+            print(users)
+            for u in users:
             # print(u)
-            try:
-                eyploy = list(Employment.objects.filter(uid=u.user.id))
-                if eyploy:
-                    number = number + 1
-                    for uu in eyploy:
-                        average = average + uu.salary
-            except Exception as e:
-                print(e)
-    if flag == 2:
+                try:
+                    eyploy = list(Employment.objects.filter(uid=u.user.id))
+                    if eyploy:
+                        number = number + 1
+                        for uu in eyploy:
+                            average = average + uu.salary
+                except Exception as e:
+                    print(e)
+        if flag == 2:
         # 代表专业
-        major = req["major"]
-        users = list(User_Profile_Graduate.objects.filter(major=major))
-        print(users)
-        for u in users:
+            major = req["major"]
+            users = list(User_Profile_Graduate.objects.filter(major=major))
+            print(users)
+            for u in users:
             # print(u)
-            try:
-                eyploy = list(Employment.objects.filter(uid=u.user.id))
-                if eyploy:
-                    number = number + 1
-                    for uu in eyploy:
-                        average = average + uu.salary
-            except Exception as e:
-                print(e)
-    return JsonResponse({"average_salary": round(average / number, 2)})
+                try:
+                    eyploy = list(Employment.objects.filter(uid=u.user.id))
+                    if eyploy:
+                        number = number + 1
+                        for uu in eyploy:
+                            average = average + uu.salary
+                except Exception as e:
+                    print(e)
+        return JsonResponse({"msg":1,"average_salary": round(average / number, 2)})
+    else:
+        return({"msg":2})
 
 
 # 查看毕业生进入500强企业的情况
 @csrf_exempt
 @require_http_methods(["POST"])
 def ShowTop500(request):
-    req = simplejson.loads(request.body)
-    print(req)
-    flag = req["flag"]
-    number=0;#进入500强企业的人数
-    top500={}
-    top_500=[]
-    if flag == 1:
-        # 代表学院
-        institute = req["college"]
-        users = list(User_Profile_Graduate.objects.filter(institute=institute))
-        print(users)
-        for u in users:
-            # print(u)
-            try:
-                eyploy = list(Employment.objects.filter(uid=u.user.id))
-                if eyploy:
-                    for u in eyploy:
-                        if u.istop500:
+    if (request.method == "POST"):
+        req = simplejson.loads(request.body)
+        dic = cache.get(req["sessionid"])
+        if dic is None:
+            return JsonResponse({"msg":0})
+        req = simplejson.loads(request.body)
+        print(req)
+        flag = req["flag"]
+        number=0;#进入500强企业的人数
+        top500={}
+        top_500=[]
+        if flag == 1:
+            # 代表学院
+            institute = req["college"]
+            users = list(User_Profile_Graduate.objects.filter(institute=institute))
+            print(users)
+            for u in users:
+                # print(u)
+                try:
+                    eyploy = list(Employment.objects.filter(uid=u.user.id))
+                    if eyploy:
+                        for u in eyploy:
+                            if u.istop500:
                             # print(u.istop500)
-                            number = number + 1
-                            if u.company_name in top500:
+                                number = number + 1
+                                if u.company_name in top500:
                                 # print(u.company_name)
-                                top500[u.company_name]=top500[u.company_name]+1
-                            else:
-                                top500[u.company_name]=1
-            except Exception as e:
-                print(e)
-    if flag == 2:
+                                    top500[u.company_name]=top500[u.company_name]+1
+                                else:
+                                    top500[u.company_name]=1
+                except Exception as e:
+                    print(e)
+        if flag == 2:
         # 代表专业
-        major = req["major"]
-        users = list(User_Profile_Graduate.objects.filter(major=major))
-        print(users)
-        for u in users:
-            print(u)
-            try:
-                eyploy = list(Employment.objects.filter(uid=u.user.id))
-                if eyploy:
-                    for u in eyploy:
+            major = req["major"]
+            users = list(User_Profile_Graduate.objects.filter(major=major))
+            print(users)
+            for u in users:
+                print(u)
+                try:
+                    eyploy = list(Employment.objects.filter(uid=u.user.id))
+                    if eyploy:
+                        for u in eyploy:
                         # print(u.istop500)
-                        if u.istop500:
-                            number = number + 1
-                            if u.company_name in top500:
-                                top500[u.company_name] = top500[u.company_name] + 1
-                            else:
-                                top500[u.company_name] = 1
-            except Exception as e:
-                print(e)
-    for u in top500.keys():
-        top_500.append({"company":u, "num":top500[u]})
-    return JsonResponse({"number":number,"top_500":top_500})
+                            if u.istop500:
+                                number = number + 1
+                                if u.company_name in top500:
+                                    top500[u.company_name] = top500[u.company_name] + 1
+                                else:
+                                    top500[u.company_name] = 1
+                except Exception as e:
+                    print(e)
+        for u in top500.keys():
+            top_500.append({"company":u, "num":top500[u]})
+        return JsonResponse({"msg":1,"number":number,"top_500":top_500})
+    else:
+        return({"msg":2})
