@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token ,rotate_token
 from django.core.mail import send_mail,send_mass_mail,EmailMultiAlternatives
 from django.views.decorators.http import require_http_methods
-import simplejson
+import json
 from django.conf import settings
 import uuid
 import hashlib
@@ -26,80 +26,98 @@ import os
 import uuid
 import shutil
 import datetime
-localurl="http://172.16.3.61:8000"
 
+localurl="http://0.0.0.0:8000/"
 
 #生成随机字符串
 def get_random_str():
     word_range='AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890'
-    four_letter_1=random.sample(word_range,4)
+    four_letter_1=random.sample(word_range,6)
     four_letter_2=''.join(four_letter_1)
     return four_letter_2
 
-#注册用户
+@csrf_exempt
+#发送随机字符串到邮箱
+def send_random_str(request):
+    if(request.method=='POST'):
+        req = request.POST
+        response = {}
+        #首先判断邮箱是否已经存在
+        email_exist = User.objects.filter(email=req["email"])
+        if email_exist:
+            response["msg"] = 3  #邮箱已经存在
+            return JsonResponse(response)
+
+        response["msg"] = 1
+        random_str = get_random_str()
+        # url = localurl + "/delonixregia/verify/" + random_str + "/"
+        subject = "验证码邮件"
+        content = "请在注册界面输入以下验证码:"+random_str
+        recipient_email = [req["email"]]
+        from_email = settings.DEFAULT_FROM_EMAIL
+        mail = EmailMultiAlternatives(subject, content, from_email, recipient_email)
+        try:
+            mail.send()
+            # 发送成功，把随机字符串保存在cache中
+            # Cache的设置有讲究, key要为随机字符串，是为了防止用户使用同一个邮箱多次申请
+            # Cache必须用键值对来标志用户，不然会出现刷号现象--邮箱可以绕过验证
+            cache.set(random_str, req["email"], 2 * 60) #设置时间长为2分钟的cache
+        except Exception as e:
+            response["msg"] = 2     #发送失败
+        return JsonResponse(response)
+
+@csrf_exempt
+#验证随机字符串
+def verify_random_str(request):
+    if (request.method == 'POST'):
+        response = {}
+        response["msg"] = 1
+        req = request.POST
+        email = cache.get(req["random_str"])
+        if email is not None:
+            if email != req["email"]:
+                response["msg"]=2
+            else:
+                cache.delete(req["random_str"])
+        else:
+            response["msg"]=2
+        return JsonResponse(response)
+
+#注册用户(毕业生)
+#企业用户的注册由管理员完成
 @csrf_exempt
 @require_http_methods(["POST"])
 def register(request):
-    response = {} #字典
+    response = {}
     if(request.method=="POST"):
-        response["msg"] = 'true'
-        req=simplejson.loads(request.body)
-        username=req["username"]
-        password=req["password"]
-        email=req["email"]
-        identity=req["identity"]
-        user=User.objects.filter(username=username)
-        emailexist=User.objects.filter(email=email)
-        #用户名已存在
-        if user and user[0].is_active:
-            response["msg"]='f_ualready'
+        response["msg"] = 1
+        req = request.POST
+        #检验用户是否存在
+        user_exist = User.objects.filter(email=req["email"])
+        if user_exist:
+            response["msg"] = 2 #用户存在
             return JsonResponse(response)
-        if emailexist and emailexist[0].is_active:
-            response["msg"]='f_ealready'
-            return JsonResponse(response)
-        #如果不存在,创建一个user
-        if not user:
-            user=User.objects.create_user(username=username,password=password)
-            user.email=email
-            user.is_active=False
-            user.save()
-            # 保存到数据库
-            # 设置用户的身份
-            # 初始化部分信息
-            if identity=="1":
-                profile=User_Profile_Graduate(user=user)
-            if identity=="2":
-                profile = User_Profile_Stu(user=user)
-            if identity=="3":
-                profile = User_Profile_Company(user=user)
-            profile.identity = identity
-            profile.email = email
-            profile.save() 
-            fuser = Friends(user=user, followedby=user)
-            fuser.save()
-            job=JobExperience(user=user)
-            job.save()
-            e=EducationExperience(user=user)
-            e.save()
-        #如果用户已存在但是不是有效的,那么直接对这个用户发送邮件
-        #发送邮件
-        #生成随机字符串
-        random_str=get_random_str()
-        url = localurl+"/delonixregia/verify/"+random_str+"/"
-        subject="激活邮件"
-        content="点击下方进行激活"
-        recipient_emial=[email]
-        html_content="<p>欢迎使用凤凰花开,请点击</p><a href='"+url+"'>此处</a><p>进行验证<p>"
-        from_email=settings.DEFAULT_FROM_EMAIL
-        mail=EmailMultiAlternatives(subject,content,from_email,recipient_emial)
-        mail.attach_alternative(html_content,"text/html")
-        try:
-            mail.send()
-            #发送成功，把随机字符串保存在cache中
-            cache.set(random_str,username,15*60)
-        except Exception as e:
-            response["msg"]="f_send" #发送失败
-            return JsonResponse(response)
+        #使用邮箱来作为用户名
+        user=User.objects.create_user(username=req["email"],password=req["password"])
+        user.email=req["email"]
+        user.save()
+        profile = User_Profile_Graduate(user=user)
+        profile.email = req["email"]
+        profile.name = req["name"]
+        profile.gender = req["gender"]
+        profile.phonenum = req["phonenum"]
+        profile.major = req["major"]
+        profile.birth_date = req["birth_date"]
+        profile.graduate_date = req["graduate_date"]
+        profile.stunum = req["stunum"]
+        profile.institute = req["institute"]
+        profile.save()
+        # fuser = Friends(user=user, followedby=user)
+        # fuser.save()
+        # job=JobExperience(user=user)
+        # job.save()
+        # e=EducationExperience(user=user)
+        # e.save()
         return JsonResponse(response)
 
 #激活用户
@@ -109,7 +127,7 @@ def active(request):
     response={}
     if(request.method=="POST"):
         response["msg"] = "true"
-        req=simplejson.loads(request.body)
+        req=json.loads(request.body)
         username=cache.get(req["rstr"])
         print(req["rstr"])
         if username:
@@ -133,7 +151,7 @@ def findpas(request):
     response={}
     if(request.method=="POST"):
         response["msg"]="true"
-        req=simplejson.loads(request.body)
+        req=json.loads(request.body)
         email=req["email"]
         if User.objects.filter(email=email):
             # 生成随机字符串
@@ -160,7 +178,7 @@ def verifyandsetpas(request):
     response={}
     if (request.method == "POST"):
         response["msg"] = "true"
-        req = simplejson.loads(request.body)
+        req = json.loads(request.body)
         email=cache.get(req["random_str"])
         if email:
             user=User.objects.get(email=email)
@@ -177,7 +195,7 @@ def changepas(request):
     response = {}
     if request.method == 'POST':
         response["msg"] = "true"
-        req = simplejson.loads(request.body)
+        req = json.loads(request.body)
         username = req['username']
         oldpassword=req["oldpassword"]
         newpassword=req["newpassword"]
@@ -203,7 +221,7 @@ def log_in(request):
         msg = 'true'
         try:
             print(request.body)
-            req=simplejson.loads(request.body)
+            req=json.loads(request.body)
         except Exception as e:
             print(e)
         username=req['username']
@@ -249,7 +267,7 @@ def log_out(request):
     # del request.session["sessionid"]
     #删除cache中的配置
     try:
-        sessionid=simplejson.loads(request.body)["sessionid"]
+        sessionid=json.loads(request.body)["sessionid"]
         cache.delete(sessionid)
     except Exception as e:
         print(e)
@@ -260,7 +278,7 @@ def log_out(request):
 #获取个人信息
 def get_profile(request):
     if(request.method=="POST"):
-        req = simplejson.loads(request.body)
+        req = json.loads(request.body)
         identity=req.get("identity")
         sessionid=req.get("sessionid")
         dic=cache.get(sessionid)
@@ -323,9 +341,9 @@ def update_profile(request):
     response = {}
     if(request.method=="POST"):
         response["msg"] = "true"
-        sessionid=simplejson.loads(request.body).get("sessionid",None)
+        sessionid=json.loads(request.body).get("sessionid",None)
         dic=cache.get(sessionid)
-        req=simplejson.loads(request.body)
+        req=json.loads(request.body)
         #cache过期
         if dic is None:
             return JsonResponse({"msg":"expire"})
@@ -334,7 +352,7 @@ def update_profile(request):
         identity = req.get("identity", None)
         # username = request.session.get("username", None)
         # is_login = request.session.get("is_login", False)
-        # identity = simplejson.loads(request.body).get("identity", None)
+        # identity = json.loads(request.body).get("identity", None)
         #block代表不同的区域
         block=req["block"]
         user = User.objects.get(username=username)
@@ -421,7 +439,7 @@ def update_profile(request):
 def follw(request):
     response={}
     if request.method=="POST":
-        req=simplejson.loads(request.body)
+        req=json.loads(request.body)
         sessionid=req["sessionid"]
         #被关注人的id
         fid=req["fid"]
@@ -462,7 +480,7 @@ def follw(request):
 #取消关注某人
 def unfollow(request):
     if(request.method=="POST"):
-        req=simplejson.loads(request.body)
+        req=json.loads(request.body)
         dic=cache.get(req["sessionid"])
         if dic is None:
             return JsonResponse({"msg":"expire"})
@@ -480,7 +498,7 @@ def unfollow(request):
 def showmyfollows(request):
     response = {}
     response["msg"] = "true"
-    req = simplejson.loads(request.body)
+    req = json.loads(request.body)
     sessionid = req["sessionid"]
     dic = cache.get(sessionid)
     if dic is None:
@@ -519,7 +537,7 @@ def showmyfollows(request):
 def showmyfans(request):
     response = {}
     response["msg"] = "true"
-    req = simplejson.loads(request.body)
+    req = json.loads(request.body)
     sessionid = req["sessionid"]
     dic = cache.get(sessionid)
     if dic is None:
@@ -560,7 +578,7 @@ def showmymessage(request):
     if(request.method=="POST"):
         response = {}
         response["msg"] = "true"
-        req = simplejson.loads(request.body)
+        req = json.loads(request.body)
         sessionid = req["sessionid"]
         dic = cache.get(sessionid)
         if dic is None:
@@ -600,7 +618,7 @@ def showmymessage(request):
 def searchuser(request):
     response={}
     response["msg"]="true"
-    req=simplejson.loads(request.body)
+    req=json.loads(request.body)
     if request.method=="POST":
         dic=cache.get(req["sessionid"])
         if dic is None:
@@ -702,7 +720,7 @@ def uploadresume(request):
 #删除简历
 def deleteresume(request):
     if (request.method == "POST"):
-        req=simplejson.loads(request.body)
+        req=json.loads(request.body)
         sessionid = req["sessionid"]
         dic = cache.get(sessionid)
         if dic is None:
@@ -735,7 +753,7 @@ def deleteresume(request):
 #展示毕业生简历,返回url
 def showgraresume(request):
     if (request.method == "POST"):
-        req=simplejson.loads(request.body)
+        req=json.loads(request.body)
         sessionid = req["sessionid"]
         dic = cache.get(sessionid)
         response={}
@@ -764,7 +782,7 @@ def showgraresume(request):
 #展示企业获得的简历,返回url
 def showcompanyresume(request):
     if (request.method == "GET"):
-        req=simplejson.loads(request.body)
+        req=json.loads(request.body)
         sessionid = req["sessionid"]
         dic = cache.get(sessionid)
         response={}
@@ -794,7 +812,7 @@ def showcompanyresume(request):
 #投递简历
 def sendresume(request):
     if (request.method == "POST"):
-        req = simplejson.loads(request.body)
+        req = json.loads(request.body)
         sessionid = req["sessionid"]
         dic = cache.get(sessionid)
         response = {}
@@ -830,7 +848,7 @@ def sendresume(request):
 #下载文件
 def downloadfile(request):
     if(request.method=="POST"):
-        req = simplejson.loads(request.body)
+        req = json.loads(request.body)
         sessionid = req["sessionid"]
         dic = cache.get(sessionid)
         response = {}
@@ -850,7 +868,7 @@ def downloadfile(request):
 @csrf_exempt
 def showcity(request):
     if(request.method=="POST"):
-        req=simplejson.loads(request.body)
+        req=json.loads(request.body)
         dic=cache.get(req["sessionid"])
         if dic is None:
             return JsonResponse({"msg":"expire"})
@@ -883,7 +901,7 @@ def showcity(request):
 @csrf_exempt
 def showsalary(request):
     if(request.method=="POST"):
-        req=simplejson.loads(request.body)
+        req=json.loads(request.body)
         dic=cache.get(req["sessionid"])
         if dic is None:
             return JsonResponse({"msg":"expire"})
@@ -925,7 +943,7 @@ def showsalary(request):
 @csrf_exempt
 def ShoweRateByYear(request):
     if(request.method=="POST"):
-        req=simplejson.loads(request.body)
+        req=json.loads(request.body)
         dic=cache.get(req["sessionid"])
         if dic is None:
             return JsonResponse({"msg":"expire"})
@@ -955,7 +973,7 @@ def ShoweRateByYear(request):
 @csrf_exempt
 def ShoweRateByMajor(request):
     if(request.method=="POST"):
-        req=simplejson.loads(request.body)
+        req=json.loads(request.body)
         dic=cache.get(req["sessionid"])
         if dic is None:
             return JsonResponse({"msg":"expire"})
@@ -988,7 +1006,7 @@ def ShoweRateByMajor(request):
 @csrf_exempt
 def ShowJobField(request):
     if (request.method == "POST"):
-        req = simplejson.loads(request.body)
+        req = json.loads(request.body)
         dic = cache.get(req["sessionid"])
         if dic is None:
             return JsonResponse({"msg": "expire"})

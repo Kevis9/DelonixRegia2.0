@@ -6,7 +6,7 @@ from . import views
 urlpatterns=[
     #保证这个应用里面的都是接口，是给前端提供数据的接口
     #注册
-    path('register/',views.register),
+    path('register',views.register),
     #验证邮箱
     path('active/',views.active),
     #登陆
@@ -59,7 +59,12 @@ urlpatterns=[
     #查看方向
     path('ShowJobField',views.ShowJobField,name='ShowJobField'),
     #查看薪水
-    path('showsalary',views.showsalary,name="showsalary")
+    path('showsalary',views.showsalary,name="showsalary"),
+
+    #发送验证码
+    path('send_random_str',views.send_random_str,name="send_random_str"),
+    #验证验证码
+    path('verify_random_str',views.verify_random_str,name="verify_random_str")
 
 ]
 

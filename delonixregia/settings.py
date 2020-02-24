@@ -194,11 +194,11 @@ MEDIA_URL = '/media/'
 #设置session在session表中的期限,默认为2周,超过之后key就会被删除,重新随机生成
 # SESSION_COOKIE_AGE = 30
 
-#Cache设置 利用数据库存储cache,memcached暂时先不考虑
+#Cache设置,使用本地内存
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'my_cache_table',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
     }
 }
 secure_ssl_redirect=True
