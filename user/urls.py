@@ -10,7 +10,9 @@ urlpatterns=[
     #验证邮箱
     path('active/',views.active),
     #登陆
-    path('login/',views.log_in),
+    path('login',views.log_in),
+    #检查登录Cookie -- 防止重复登录 实现自动登录
+    path('check_log',views.check_log),
     #登出
     path('logout/',views.log_out),
     #更改密码

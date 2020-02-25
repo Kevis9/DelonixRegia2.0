@@ -7,7 +7,7 @@ from .models import User_Profile_Stu,\
     User_Profile_Graduate,\
     User_Profile_Company,JobExperience,\
     EducationExperience,Friends,Message,Company_Resume,\
-    Graduate_Resume
+    Graduate_Resume,User_Admin
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token ,rotate_token
 from django.core.mail import send_mail,send_mass_mail,EmailMultiAlternatives
@@ -211,53 +211,62 @@ def changepas(request):
             response["msg"]="false"
         return JsonResponse(response)
 
+#检查Cookie
+@require_http_methods(["GET"])
+def check_log(request):
+    uid = request.get_signed_cookie('is_logged',salt='wobuzhidaoyongshenmejiamisuanfabijiaohaozLPQ',default=None)
+    dic = {}
+    dic["msg"] = 1
+    if uid is None:
+        dic["msg"] = 2
+    return JsonResponse(dic)
+
 @csrf_exempt
+@require_http_methods(["POST"])
 #登陆
 def log_in(request):
     # 设置响应
-    response={}
+    dic={}
+    response = HttpResponse()
     if request.method=="POST":
-        # str=request.META.get("HTTP_SESSIONID")
-        msg = 'true'
-        try:
-            print(request.body)
-            req=json.loads(request.body)
-        except Exception as e:
-            print(e)
+        dic["msg"] = 1
+        req = request.POST
         username=req['username']
         password=req['password']
         try:
             user_a = User.objects.get(username=username)  # 这个设置是为了更详细的检查出错误来,因为这个地方get函数不会返回none，一旦找不到，便会给一个exception
             user = authenticate(username=username, password=password)  # 而authenticate就能返回一个none
             if user:
-                login(request,user)
-                # request.session['is_login']=True
-                # request.session['username']=username
-                # cache.set(key,value,timeout) timeout代笔缓存的时间，None意味着永久
-                # 在这里我将cache设置成数据库的BACKEND,memcached也可以，基于内存，或者redis
-                cache.set(request.session.session_key,{"username":username,"is_login":True},3600*24*3)
+                #判断user的身份是否正确
+                identity = req["identity"]
+                flag = 1
+                if identity == '1':
+                    gra_user = User_Profile_Graduate.objects.filter(user=user)
+                    if len(gra_user) == 0:
+                        flag = 0
+                else:
+                    if identity == '3':
+                        com_user = User_Profile_Company.objects.filter(user=user)
+                        if len(com_user) == 0:
+                            flag = 0
+                    else:
+                        admin_user = User_Admin.objects.filter(user=user)
+                        if len(admin_user) == 0:
+                            flag = 0
+                if flag == 0:
+                    dic["msg"] = 4      #用户身份错误
+                else:
+                    response.set_signed_cookie('is_logged',user.id,salt="wobuzhidaoyongshenmejiamisuanfabijiaohaozLPQ",max_age=24*3600*7)   #Cookie的有效期为7天
+                    response.content = json.dumps(dic)
             else:
-                msg = "密码错误"
-                return JsonResponse({"msg":msg})
-            userstuprofile=list(User_Profile_Stu.objects.filter(user=user))
-            usergraduateprofile=list(User_Profile_Graduate.objects.filter(user=user))
-            usergraduatecompany = list(User_Profile_Company.objects.filter(user=user))
-            if len(userstuprofile)>0:
-                response["identity"]=userstuprofile[0].identity
-            if len(usergraduateprofile)>0:
-                response["identity"] = usergraduateprofile[0].identity
-            if len(usergraduatecompany) > 0:
-                response["identity"] = usergraduatecompany[0].identity
-            response["msg"]=msg
-            response["sessionid"]=request.session.session_key
-            return JsonResponse(response)
+                dic["msg"] = 3  #用户密码错误
+            response.content = json.dumps(dic)
+            return response
         except Exception as e:
             print(e)
-            msg = "用户不存在"
-            response["msg"]=msg
-            return JsonResponse(response)
-    response=HttpResponse()
-    get_token(request)  # 产生一个token 用于csrf验证
+            dic["msg"] = 2     #用户不存在
+            return JsonResponse(dic)
+    # get_token(request)  # 产生一个token 用于csrf验证
     return response
 
 @csrf_exempt
