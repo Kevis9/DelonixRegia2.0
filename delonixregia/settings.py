@@ -27,6 +27,7 @@ SECRET_KEY = '0$lu8=cblwv&)vxl6qb!lt+b8ec0t*))^o+c(g+&zt^xlu6kzg'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+AUTH_USER_MODEL = "user.USER"
 
 
 # Application definition

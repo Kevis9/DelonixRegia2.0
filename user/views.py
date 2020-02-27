@@ -1,13 +1,13 @@
 #!/usr/bin/python
 #coding=utf-8
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import USER,Group
 from django.contrib.auth import authenticate,login,logout
 from django.http import JsonResponse,HttpResponse
 from .models import User_Profile_Stu,\
     User_Profile_Graduate,\
     User_Profile_Company,JobExperience,\
     EducationExperience,Friends,Message,Company_Resume,\
-    Graduate_Resume,User_Admin
+    Graduate_Resume,User_Admin,USER
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token ,rotate_token
 from django.core.mail import send_mail,send_mass_mail,EmailMultiAlternatives
@@ -27,6 +27,7 @@ import uuid
 import shutil
 import datetime
 
+
 localurl="http://0.0.0.0:8000/"
 
 #生成随机字符串
@@ -43,11 +44,10 @@ def send_random_str(request):
         req = request.POST
         response = {}
         #首先判断邮箱是否已经存在
-        email_exist = User.objects.filter(email=req["email"])
+        email_exist = USER.objects.filter(email=req["email"])
         if email_exist:
             response["msg"] = 3  #邮箱已经存在
             return JsonResponse(response)
-
         response["msg"] = 1
         random_str = get_random_str()
         # url = localurl + "/delonixregia/verify/" + random_str + "/"
@@ -93,15 +93,17 @@ def register(request):
         response["msg"] = 1
         req = request.POST
         #检验用户是否存在
-        user_exist = User.objects.filter(email=req["email"])
+        user = USER(identity="1")
+        user_exist = USER.objects.filter(email=req["email"])
         if user_exist:
             response["msg"] = 2 #用户存在
             return JsonResponse(response)
         #使用邮箱来作为用户名
-        user=User.objects.create_user(username=req["email"],password=req["password"])
+        user=USER.objects.create_user(username=req["email"],password=req["password"])
         user.email=req["email"]
         user.save()
-        profile = User_Profile_Graduate(user=user)
+        profile = User_Profile_Graduate.objects.get(user=user)
+        # profile = User_Profile_Graduate(USER=USER)
         profile.email = req["email"]
         profile.name = req["name"]
         profile.gender = req["gender"]
@@ -112,11 +114,11 @@ def register(request):
         profile.stunum = req["stunum"]
         profile.institute = req["institute"]
         profile.save()
-        # fuser = Friends(user=user, followedby=user)
-        # fuser.save()
-        # job=JobExperience(user=user)
+        # fUSER = Friends(USER=USER, followedby=USER)
+        # fUSER.save()
+        # job=JobExperience(USER=USER)
         # job.save()
-        # e=EducationExperience(user=user)
+        # e=EducationExperience(USER=USER)
         # e.save()
         return JsonResponse(response)
 
@@ -132,7 +134,7 @@ def active(request):
         print(req["rstr"])
         if username:
             try:
-                user=User.objects.get(username=username)
+                user=user.objects.get(username=username)
                 user.is_active=True
                 user.save()
             except Exception as e:
@@ -153,7 +155,7 @@ def findpas(request):
         response["msg"]="true"
         req=json.loads(request.body)
         email=req["email"]
-        if User.objects.filter(email=email):
+        if USER.objects.filter(email=email):
             # 生成随机字符串
             random_str = get_random_str()
             subject = "找回密码"
@@ -181,9 +183,9 @@ def verifyandsetpas(request):
         req = json.loads(request.body)
         email=cache.get(req["random_str"])
         if email:
-            user=User.objects.get(email=email)
-            user.set_password(req["newpassword"])
-            user.save()
+            USER=USER.objects.get(email=email)
+            USER.set_password(req["newpassword"])
+            USER.save()
         else:
             response["msg"]="false"
     return JsonResponse(response)
@@ -200,11 +202,11 @@ def changepas(request):
         oldpassword=req["oldpassword"]
         newpassword=req["newpassword"]
         try:
-            user = User.objects.get(username=username)
-            if check_password(oldpassword,user.password):
+            USER = USER.objects.get(username=username)
+            if check_password(oldpassword,USER.password):
                 #修改密码的函数
-                user.set_password(newpassword)
-                user.save()
+                USER.set_password(newpassword)
+                USER.save()
             else:
                 response["msg"]="false"
         except Exception as e:
@@ -214,10 +216,10 @@ def changepas(request):
 #检查Cookie
 @require_http_methods(["GET"])
 def check_log(request):
-    uid = request.get_signed_cookie('is_logged',salt='wobuzhidaoyongshenmejiamisuanfabijiaohaozLPQ',default=None)
+    req = request.get_signed_cookie('is_logged',salt='wobuzhidaoyongshenmejiamisuanfabijiaohaozLPQ',default=None)
     dic = {}
     dic["msg"] = 1
-    if uid is None:
+    if req is None:
         dic["msg"] = 2
     return JsonResponse(dic)
 
@@ -231,29 +233,17 @@ def log_in(request):
     if request.method=="POST":
         dic["msg"] = 1
         req = request.POST
+        # print(req)
         username=req['username']
         password=req['password']
         try:
-            user_a = User.objects.get(username=username)  # 这个设置是为了更详细的检查出错误来,因为这个地方get函数不会返回none，一旦找不到，便会给一个exception
+            user_a = USER.objects.get(username=username)  # 这个设置是为了更详细的检查出错误来,因为这个地方get函数不会返回none，一旦找不到，便会给一个exception
+            # print(user_a.password)
             user = authenticate(username=username, password=password)  # 而authenticate就能返回一个none
             if user:
-                #判断user的身份是否正确
+                #判断USER的身份是否正确
                 identity = req["identity"]
-                flag = 1
-                if identity == '1':
-                    gra_user = User_Profile_Graduate.objects.filter(user=user)
-                    if len(gra_user) == 0:
-                        flag = 0
-                else:
-                    if identity == '3':
-                        com_user = User_Profile_Company.objects.filter(user=user)
-                        if len(com_user) == 0:
-                            flag = 0
-                    else:
-                        admin_user = User_Admin.objects.filter(user=user)
-                        if len(admin_user) == 0:
-                            flag = 0
-                if flag == 0:
+                if identity != user.identity:
                     dic["msg"] = 4      #用户身份错误
                 else:
                     response.set_signed_cookie('is_logged',user.id,salt="wobuzhidaoyongshenmejiamisuanfabijiaohaozLPQ",max_age=24*3600*7)   #Cookie的有效期为7天
@@ -269,80 +259,46 @@ def log_in(request):
     # get_token(request)  # 产生一个token 用于csrf验证
     return response
 
-@csrf_exempt
+
 #登出
 def log_out(request):
-    response={"msg":"true"}
-    # del request.session["sessionid"]
-    #删除cache中的配置
+    dic = {}
+    response = HttpResponse()
+    dic["msg"] = 1
     try:
-        sessionid=json.loads(request.body)["sessionid"]
-        cache.delete(sessionid)
+        response.delete_cookie('is_logged')
+        response.content = json.dumps(dic)
     except Exception as e:
         print(e)
-        response["msg"]="false"
-    return JsonResponse(response)
+        dic["msg"] = 2
+        response.content = json.dumps(dic)
+    return response
 
-@csrf_exempt
-#获取个人信息
+
+@require_http_methods(["GET"])
+#获取用户个人基本信息
 def get_profile(request):
-    if(request.method=="POST"):
-        req = json.loads(request.body)
-        identity=req.get("identity")
-        sessionid=req.get("sessionid")
-        dic=cache.get(sessionid)
-        #cache过期
-        if dic is None:
-            return JsonResponse({"msg":"expire"})
-        username=cache.get(sessionid).get("username",None)
-        is_login = cache.get(sessionid).get("is_login", False)  # 如果is_login没有设置值的话，默认为False
-        # username = request.session.get("username", None)
-        # is_login = request.session.get("is_login", False)  # 如果is_login没有设置值的话，默认为False
-        response = {}
-        msg = 'true'
-        #登陆成功
-        if is_login:
-            user=User.objects.get(username=username)
-            #毕业生
-            if identity=='1':
-                try:
-                    userprofile = User_Profile_Graduate.objects.get(user=user)
-                    #模型转为字典
-                    response=model_to_dict(userprofile)
-                    response["msg"]=msg
-                    #工作经历的获取
-                    joblist=list(JobExperience.objects.filter(user=user))
-                    response["jobexperience"]=[]
-                    for job in joblist:
-                        response["jobexperience"].append(model_to_dict(job))
-                    print(response["jobexperience"])
-                    # 头像获取
-                    response["imgurl"] = userprofile.imgurl
-                    return JsonResponse(response)
-                except Exception as e:
-                    return JsonResponse({"msg":"false"})
-            #企业
-            if identity=='3':
-                try:
-                    userprofile = User_Profile_Company.objects.get(user=user)
-                    response["name"] = User_Profile_Company.name
-                    response["email"]=User_Profile_Company.email
-                    response["honour"]=User_Profile_Company.honour
-                    response["identity"]=User_Profile_Company.identity
-                    response["user_id"] = user.id
-                    response["msg"]=msg
-                    # 头像获取
-                    response["imgurl"] = userprofile.imgurl
-                    return JsonResponse(response)
-                except Exception as e:
-                    response["msg"]=e
-                    return JsonResponse(response)
-            return JsonResponse({"msg":"no identity"})
-        else:
-            response["msg"]="false"
-            return JsonResponse(response)
-    else:
-        return JsonResponse({"msg:WM"})
+    # 首先检验cookie是否过期---请求check_log接口
+    # cookie里面存了用户的信息
+    uid = request.get_signed_cookie('is_logged',salt='wobuzhidaoyongshenmejiamisuanfabijiaohaozLPQ',default=None)
+    dic = {}
+    dic["msg"] = 1
+    # 根据用户的身份返回不同的信息
+    user = USER.objects.get(id=uid)
+    try:
+        if (user.identity == "1"):
+            profile = User_Profile_Graduate.objects.get(user=uid)
+            dic = model_to_dict(profile)
+        if (user.identity == "3"):
+            profile = User_Profile_Company.objects.get(user=uid)
+            dic = model_to_dict(profile)
+        if (user.identity == "4"):
+            profile = User_Admin.objects.get(user=uid)
+            dic = model_to_dict(profile)
+    except Exception as e:
+        dic["msg"] = 2
+        print(e)
+    return JsonResponse(dic)
 
 @csrf_exempt
 #更新个人信息
@@ -364,35 +320,35 @@ def update_profile(request):
         # identity = json.loads(request.body).get("identity", None)
         #block代表不同的区域
         block=req["block"]
-        user = User.objects.get(username=username)
+        USER = USER.objects.get(username=username)
         if is_login:
             #毕业生
             if identity == '1':
                 try:
-                    userprofile = User_Profile_Graduate.objects.get(user=user)
+                    USERprofile = User_Profile_Graduate.objects.get(USER=USER)
                     if block=="0":
-                        # userprofile.update(**req)
-                        userprofile.name=req["name"]
-                        userprofile.gender = req["gender"]
+                        # USERprofile.update(**req)
+                        USERprofile.name=req["name"]
+                        USERprofile.gender = req["gender"]
                         #头像
-                        userprofile.imgurl=req["imgurl"]
+                        USERprofile.imgurl=req["imgurl"]
                     if block=="1":
                         # 因为字典的内容和model可能对不上，故不用此函数
-                        # userprofile.update(**req)
-                        userprofile.age = req["age"]
-                        userprofile.birth_data = req["birth_date"]
-                        userprofile.major = req["major"]
-                        userprofile.education_backgroud = req["education_backgroud"]
-                        userprofile.university = req["university"]
-                        userprofile.living_city = req["living_city"]
-                        userprofile.living_provice=req["living_provice"]
-                        userprofile.email = req["email"]
-                        userprofile.phonenumber = req["phonenum"]
-                        userprofile.school_period_start = req["admission_date"]
-                        userprofile.school_period_end = req["graduate_date"]
+                        # USERprofile.update(**req)
+                        USERprofile.age = req["age"]
+                        USERprofile.birth_data = req["birth_date"]
+                        USERprofile.major = req["major"]
+                        USERprofile.education_backgroud = req["education_backgroud"]
+                        USERprofile.university = req["university"]
+                        USERprofile.living_city = req["living_city"]
+                        USERprofile.living_provice=req["living_provice"]
+                        USERprofile.email = req["email"]
+                        USERprofile.phonenumber = req["phonenum"]
+                        USERprofile.school_period_start = req["admission_date"]
+                        USERprofile.school_period_end = req["graduate_date"]
                     if block=="2":
                         if req["add"]=="1":
-                            education_e = EducationExperience(user=user)
+                            education_e = EducationExperience(USER=USER)
                             education_e.update(**req)
                             education_e.major = req["major"]
                             education_e.school = req["school"]
@@ -405,7 +361,7 @@ def update_profile(request):
                             education_e.delete()
                     if block=="3":
                         if req["add"]=="1":
-                            jobe = JobExperience(user=user)
+                            jobe = JobExperience(USER=USER)
                             # jobe.update(**req)
                             jobe.job_place = req["job_place"]
                             jobe.job = req["job"]
@@ -420,22 +376,22 @@ def update_profile(request):
                             jobe=JobExperience.objects.get(id=req["job_id"])
                             jobe.delete()
                     if block=="4":
-                        userprofile.self_judement = req["self_judement"]
-                        userprofile.self_sign = req["self_sign"]
-                    userprofile.save()
+                        USERprofile.self_judement = req["self_judement"]
+                        USERprofile.self_sign = req["self_sign"]
+                    USERprofile.save()
                 except Exception as e:
                     response["msg"]="false"
                 return JsonResponse(response)
             #企业
             if identity == '3':
                 try:
-                    userprofile = User_Profile_Company.objects.get(user=user)
-                    userprofile.phonenumber=req["phonenum"]
-                    userprofile.name=req["name"]
-                    userprofile.email=req["email"]
+                    USERprofile = User_Profile_Company.objects.get(USER=USER)
+                    USERprofile.phonenumber=req["phonenum"]
+                    USERprofile.name=req["name"]
+                    USERprofile.email=req["email"]
                     # 头像
-                    userprofile.imgurl=req["imgurl"]
-                    userprofile.save()
+                    USERprofile.imgurl=req["imgurl"]
+                    USERprofile.save()
                     response["msg"]="true"
                 except Exception as e:
                     response['msg']=e
@@ -461,20 +417,20 @@ def follw(request):
         is_login=dic["is_login"]
         if is_login:
             try:
-                # 拿到申请者user
-                user = User.objects.get(username=username)
+                # 拿到申请者USER
+                USER = USER.objects.get(username=username)
                 #关注人的id
-                fuser=User.objects.get(id=fid)
-                tmp=list(Friends.objects.filter(user=fuser))
+                fUSER=USER.objects.get(id=fid)
+                tmp=list(Friends.objects.filter(USER=fUSER))
                 if(len(tmp)==0):
-                    #friend=Friends(user=fuser) 这样写应该只是在内存中创建，不再表中创建
-                    friend=Friends.objects.create(user=fuser)
+                    #friend=Friends(USER=fUSER) 这样写应该只是在内存中创建，不再表中创建
+                    friend=Friends.objects.create(USER=fUSER)
                     print(friend.id)
                 else:
                     friend=tmp[0]
-                friend.myfollows.add(user)
+                friend.myfollows.add(USER)
                 friend.save()
-                message=Message(text=req["text"],msgfrom=user,msgto=fuser,headline=req["headline"])
+                message=Message(text=req["text"],msgfrom=USER,msgto=fUSER,headline=req["headline"])
                 message.save()
             except Exception as e:
                 response["msg"]="false"
@@ -494,8 +450,8 @@ def unfollow(request):
         if dic is None:
             return JsonResponse({"msg":"expire"})
         try:
-            fuser=Friends.objects.get(user=User.objects.get(id=req["fid"]))
-            fuser.followedby.remove(User.objects.get(username=dic["username"]))
+            fUSER=Friends.objects.get(USER=USER.objects.get(id=req["fid"]))
+            fUSER.followedby.remove(USER.objects.get(username=dic["username"]))
             return JsonResponse({"msg":"true"})
         except Exception as e:
             return JsonResponse({"msg":"false"})
@@ -515,17 +471,17 @@ def showmyfollows(request):
     is_login = dic["is_login"]
     username = dic["username"]
     if is_login:
-        user = User.objects.get(username=username)
+        USER = USER.objects.get(username=username)
         # 获得该用户的所有关注的人
         try:
-            concerns = list(user.myfollows.all())
+            concerns = list(USER.myfollows.all())
         except Exception as e:
             concerns=[]
         # 将关注的人的头像，姓名和id返回
         response["follows"] = []
         for f in concerns:
-            profile1=list(User_Profile_Graduate.objects.filter(user=f.user))
-            profile2 =list(User_Profile_Company.objects.filter(user=f.user))
+            profile1=list(User_Profile_Graduate.objects.filter(USER=f.USER))
+            profile2 =list(User_Profile_Company.objects.filter(USER=f.USER))
             dic={}
             if(len(profile1)>0):
                 dic["imgurl"] = profile1[0].imgurl
@@ -535,7 +491,7 @@ def showmyfollows(request):
                 dic["imgurl"] = profile2[0].imgurl
                 dic["name"] = profile2[0].name
                 dic["gender"]=""
-            dic["id"]=f.user.id
+            dic["id"]=f.USER.id
             response["follows"].append(dic)
         return JsonResponse(response)
     else:
@@ -554,18 +510,18 @@ def showmyfans(request):
     is_login = dic["is_login"]
     username = dic["username"]
     if is_login:
-        user = User.objects.get(username=username)
+        USER = USER.objects.get(username=username)
         # 获得所有关注该用户的人
         try:
-            fans = Friends.objects.get(user=user).myfollows.all()
+            fans = Friends.objects.get(USER=USER).myfollows.all()
         except Exception as e:
             print(e)
             fans =[]
         # 将关注的人的头像，姓名和id返回
         response["fans"] = []
         for f in fans:
-            profile1=list(User_Profile_Graduate.objects.filter(user=f))
-            profile2=list(User_Profile_Company.objects.filter(user=f))
+            profile1=list(User_Profile_Graduate.objects.filter(USER=f))
+            profile2=list(User_Profile_Company.objects.filter(USER=f))
             dic={}
             if(len(profile1)>0):
                 dic["imgurl"] = profile1[0].imgurl
@@ -596,13 +552,13 @@ def showmymessage(request):
         username = dic["username"]
         if is_login:
             try:
-                msgs=list(User.objects.get(username=username).myreceivemsg.all())
+                msgs=list(USER.objects.get(username=username).myreceivemsg.all())
             except Exception as e:
                 msgs=[]
             response["messages"]=[]
             for m in msgs:
-                profile1=list(User_Profile_Graduate.objects.filter(user=m.msgfrom))
-                profile2 = list(User_Profile_Company.objects.filter(user=m.msgfrom))
+                profile1=list(User_Profile_Graduate.objects.filter(USER=m.msgfrom))
+                profile2 = list(User_Profile_Company.objects.filter(USER=m.msgfrom))
                 dic={}
                 if(len(profile1)>0):
                     dic["name"] = profile1[0].name
@@ -624,7 +580,7 @@ def showmymessage(request):
 @csrf_exempt
 #根据关键字模糊搜索用户
 #关键字有:邮箱,姓名,用户名,
-def searchuser(request):
+def searchUSER(request):
     response={}
     response["msg"]="true"
     req=json.loads(request.body)
@@ -632,18 +588,18 @@ def searchuser(request):
         dic=cache.get(req["sessionid"])
         if dic is None:
             return JsonResponse({"msg":"expire"})
-        user=User.objects.get(username=dic["username"])
+        USER=USER.objects.get(username=dic["username"])
         key=req["key"]
-        response["users"]=[]
+        response["USERs"]=[]
         ans1=list(User_Profile_Graduate.objects.filter(Q(name__icontains=key)|Q(email__icontains=key)))
         ans2=list(User_Profile_Company.objects.filter(Q(name__icontains=key)|Q(email__icontains=key)))
         try:
-            myfollows = list(user.myfollows.all())
+            myfollows = list(USER.myfollows.all())
         except Exception as e:
             myfollows=[]
         myfollowsid=[]
         for m in myfollows:
-            myfollowsid.append(m.user.id)
+            myfollowsid.append(m.USER.id)
         ans2.extend(ans1)
         for a in ans2:
             dic = {}
@@ -657,18 +613,18 @@ def searchuser(request):
                 dic["canfollow"]="false"
             except Exception as e:
                 dic["canfollow"]="true"
-            response["users"].append(dic)
-        ans3=User.objects.filter(username__icontains=key)
+            response["USERs"].append(dic)
+        ans3=USER.objects.filter(username__icontains=key)
         for a in ans3:
             dic={}
-            profile1=list(User_Profile_Graduate.objects.filter(user=a))
+            profile1=list(User_Profile_Graduate.objects.filter(USER=a))
             dic["name"]=None
             dic["imgurl"]=None
             if(len(profile1)>0):
                 dic["name"]=profile1[0].name
                 dic["imgurl"]=profile1[0].imgurl
                 dic["gender"] = profile1[0].gender
-            profile2=list(User_Profile_Company.objects.filter(user=a))
+            profile2=list(User_Profile_Company.objects.filter(USER=a))
             if (len(profile2) > 0):
                 dic["name"] = profile2[0].name
                 dic["imgurl"] = profile2[0].imgurl
@@ -680,7 +636,7 @@ def searchuser(request):
                 dic["canfollow"]="false"
             except Exception as e:
                 dic["canfollow"]="true"
-            response["users"].append(dic)
+            response["USERs"].append(dic)
         return JsonResponse(response)
 
     else:
@@ -699,15 +655,15 @@ def uploadresume(request):
         is_login = dic["is_login"]
         username = dic["username"]
         try:
-            gra_user = User.objects.get(username=username)
+            gra_USER = USER.objects.get(username=username)
             #检验该用户的文件名是否存在
-            if(len(Graduate_Resume.objects.filter(Q(user=gra_user) and Q(name=request.POST["name"])))>0):
+            if(len(Graduate_Resume.objects.filter(Q(USER=gra_USER) and Q(name=request.POST["name"])))>0):
                 return JsonResponse({"msg":"exist"})
             file = request.FILES['resume']
             #创建一个唯一的文件名,注意加上后缀名,wb+代表二进制写的形式打开文件
             id=os.path.join("media","resume",str(uuid.uuid4())+os.path.splitext(file.name)[1])
             #创建一个resume实例,记录路径
-            resume=Graduate_Resume(user=gra_user,url=id,name=request.POST["name"])
+            resume=Graduate_Resume(USER=gra_USER,url=id,name=request.POST["name"])
             resume.save()
             try:
                 with open(os.path.join(settings.BASE_DIR,id),'wb+') as f:
@@ -771,9 +727,9 @@ def showgraresume(request):
             return JsonResponse({"msg": "expire"})
         username = dic["username"]
         try:
-            gra_user=User.objects.get(username=username)
+            gra_USER=USER.objects.get(username=username)
             try:
-                resumes=list(gra_user.myresume.all())
+                resumes=list(gra_USER.myresume.all())
             except Exception as e:
                 #报出异常一般是all()数量为0
                 print(e)
@@ -800,9 +756,9 @@ def showcompanyresume(request):
             return JsonResponse({"msg": "expire"})
         username = dic["username"]
         try:
-            com_user=User.objects.get(username=username)
+            com_USER=USER.objects.get(username=username)
             try:
-                resumes=list(com_user.resumto.all())
+                resumes=list(com_USER.resumto.all())
             except Exception as e:
                 #报出异常一般是all()数量为0
                 print(e)
@@ -830,8 +786,8 @@ def sendresume(request):
             return JsonResponse({"msg": "expire"})
         username = dic["username"]
         try:
-            gra_user=User.objects.get(username=username)
-            com_user=User.objects.get(id=req["cid"])
+            gra_USER=USER.objects.get(username=username)
+            com_USER=USER.objects.get(id=req["cid"])
             #找到文件路径
             path=os.path.join(settings.BASE_DIR,req["url"])
             #复制一份该文件,并且创建企业简历实例
@@ -840,9 +796,9 @@ def sendresume(request):
             new_id=str(uuid.uuid4())+tmp[len(tmp)-1]
             new_path=os.path.join(settings.BASE_DIR,"media","resume",new_id)
             #创建企业简历实例
-            com_resume=Company_Resume(user=gra_user,url=new_id,company=com_user,name=req["name"])
+            com_resume=Company_Resume(USER=gra_USER,url=new_id,company=com_USER,name=req["name"])
             #创建消息发送给相应的企业
-            msg=Message(msgfrom=gra_user,msgto=com_user,text=req["text"],headline=req["headline"])
+            msg=Message(msgfrom=gra_USER,msgto=com_USER,text=req["text"],headline=req["headline"])
             # 复制文件并且保存实例在数据库
             shutil.copyfile(path, new_path)
             com_resume.save()
@@ -895,7 +851,7 @@ def showcity(request):
         jobs=[]
         response={}
         for g in gra_profile:
-            jobs.extend(list(g.user.myjobexp.filter(job_period_end=None)))
+            jobs.extend(list(g.USER.myjobexp.filter(job_period_end=None)))
         for j in jobs:
             if(response[j.job_city]):
                 response[j.job_city]+=1
@@ -932,7 +888,7 @@ def showsalary(request):
         response["30k-50k"]=0
         response["50k"]=0
         for g in gra_profile:
-            jobs.extend(list(g.user.myjobexp.filter(job_period_end=None)))
+            jobs.extend(list(g.USER.myjobexp.filter(job_period_end=None)))
         for j in jobs:
             if(float(j.job_salary)/12<10000):
                 response["10k"]+=1
@@ -1033,7 +989,7 @@ def ShowJobField(request):
             gra_profile = list(User_Profile_Graduate.objects.filter(school_period_end__year=int(req["year"])))
         jobs=[]
         for g in gra_profile:
-            jobs.extend(list(g.user.myjobexp.filter(job_period_end=None)))
+            jobs.extend(list(g.USER.myjobexp.filter(job_period_end=None)))
         for j in jobs:
             if(fields[j.job]):
                 fields[j.job]+=1

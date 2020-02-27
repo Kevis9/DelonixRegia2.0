@@ -3,13 +3,14 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
+from user.models import USER
 '''
 招聘信息发布
 '''
 # 帖子
 class RecruitPost(models.Model):
     title = models.CharField(max_length=254,null=False,verbose_name="标题")
-    user = models.ForeignKey(User, related_name='myrecruitpost', verbose_name='创建人', on_delete=models.CASCADE,null=False,)
+    user = models.ForeignKey(USER, related_name='myrecruitpost', verbose_name='创建人', on_delete=models.CASCADE,null=False,)
     content = models.TextField(max_length=4000, verbose_name='帖子内容',null=False)
     time_lab = models.DateTimeField(auto_now_add=True,null=False)
     like_count = models.BigIntegerField("点赞数",default=0)
