@@ -24,6 +24,22 @@ urlpatterns=[
     path('get_profile', views.get_profile, name='get_profile'),
     #更新个人信息
     path('update_profile', views.update_profile, name='update_profile'),
+    #添加职业经历
+    path('add_jobexp',views.add_jobexp),
+    #删除职业经历
+    path('del_jobexp',views.del_jobexp),
+    #更新职业经历
+    path('update_jobexp',views.update_jobexp),
+    #查看职业经历
+    path('get_jobexp',views.get_jobexp),
+    #添加深造经历
+    path('add_eduexp',views.add_eduexp),
+    #删除深造经历
+    path('del_eduexp',views.del_eduexp),
+    #更新深造经历
+    path('update_eduexp',views.update_eduexp),
+    #获取深造经历
+    path('get_eduexp',views.get_eduexp),
     #函数验证的函数
     path('verify/',views.active,name='verify'),
     # 关注某人

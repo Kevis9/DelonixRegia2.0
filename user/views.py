@@ -29,6 +29,7 @@ import datetime
 
 
 localurl="http://0.0.0.0:8000/"
+salt = 'wobuzhidaoyongshenmejiamisuanfabijiaohaozLPQ'
 
 #生成随机字符串
 def get_random_str():
@@ -216,7 +217,7 @@ def changepas(request):
 #检查Cookie
 @require_http_methods(["GET"])
 def check_log(request):
-    req = request.get_signed_cookie('is_logged',salt='wobuzhidaoyongshenmejiamisuanfabijiaohaozLPQ',default=None)
+    req = request.get_signed_cookie('is_logged',salt=salt,default=None)
     dic = {}
     dic["msg"] = 1
     if req is None:
@@ -246,6 +247,7 @@ def log_in(request):
                 if identity != user.identity:
                     dic["msg"] = 4      #用户身份错误
                 else:
+                    print(user.id)
                     response.set_signed_cookie('is_logged',user.id,salt="wobuzhidaoyongshenmejiamisuanfabijiaohaozLPQ",max_age=24*3600*7)   #Cookie的有效期为7天
                     response.content = json.dumps(dic)
             else:
@@ -280,15 +282,15 @@ def log_out(request):
 def get_profile(request):
     # 首先检验cookie是否过期---请求check_log接口
     # cookie里面存了用户的信息
-    uid = request.get_signed_cookie('is_logged',salt='wobuzhidaoyongshenmejiamisuanfabijiaohaozLPQ',default=None)
+    uid = request.get_signed_cookie('is_logged',salt=salt,default=None)
     dic = {}
     dic["msg"] = 1
     if uid is None:
         dic["msg"] = 3
     else:
         # 根据用户的身份返回不同的信息
-        user = USER.objects.get(id=uid)
         try:
+            user = USER.objects.get(id=uid)
             if (user.identity == "1"):
                 profile = User_Profile_Graduate.objects.get(user=uid)
                 dic = model_to_dict(profile)
@@ -312,12 +314,12 @@ def update_profile(request):
         req = request.POST
         dic["msg"] = 1
         #获取Cookie
-        uid = request.get_signed_cookie('is_logged',salt='wobuzhidaoyongshenmejiamisuanfabijiaohaozLPQ',default=None)
+        uid = request.get_signed_cookie('is_logged',salt=salt,default=None)
         if uid is None:
             dic["msg"] = 2  #Cookie失效
         else:
-            user = USER.objects.get(id=uid)
             try:
+                user = USER.objects.get(id=uid)
                 if user.identity == "1":
                     #毕业生
                     profile = User_Profile_Graduate.objects.get(user=uid)
@@ -333,6 +335,217 @@ def update_profile(request):
             except Exception as e:
                 print(e)
                 dic["msg"] = 3  #信息修改失败
+    return JsonResponse(dic)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+#添加工作经历
+def add_jobexp(request):
+    dic = {}
+    if(request.method=="POST"):
+        req = request.POST
+        dic["msg"] = 1
+        #获取Cookie
+        uid = request.get_signed_cookie('is_logged',salt=salt,default=None)
+        if uid is None:
+            dic["msg"] = 2  #Cookie失效
+        else:
+            try:
+                user = USER.objects.get(id=uid)
+                if user.identity != "1":
+                    dic["msg"] = 4  #身份不符
+                else:
+                    jobexp = JobExperience(user=user)
+                    jobexp.update(req)
+            except Exception as e:
+                print(e)
+                dic["msg"] = 3  #添加失败
+    return JsonResponse(dic)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+#删除工作经历
+def del_jobexp(request):
+    dic = {}
+    if(request.method=="POST"):
+        req = request.POST
+        dic["msg"] = 1
+        #获取Cookie
+        uid = request.get_signed_cookie('is_logged',salt=salt,default=None)
+        if uid is None:
+            dic["msg"] = 2  #Cookie失效
+        else:
+            try:
+                user = USER.objects.get(id=uid)
+                if user.identity != "1":
+                    dic["msg"] = 4  #身份不符
+                else:
+                    job_exp =  JobExperience.objects.get(id=req["id"])
+                    job_exp.delete()
+            except Exception as e:
+                print(e)
+                dic["msg"] = 3  #删除失败
+    return JsonResponse(dic)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+#更新职业经历
+def update_jobexp(request):
+    dic = {}
+    if(request.method=="POST"):
+        req = request.POST
+        dic["msg"] = 1
+        #获取Cookie
+        uid = request.get_signed_cookie('is_logged',salt=salt,default=None)
+        if uid is None:
+            dic["msg"] = 2  #Cookie失效
+        else:
+            try:
+                user = USER.objects.get(id=uid)
+                if user.identity != "1":
+                    dic["msg"] = 4      #身份不符
+                else:
+                    job_exp =  JobExperience.objects.get(id=req["id"])
+                    req = req.dict()
+                    del req["id"]   #去掉id
+                    job_exp.update(req)
+            except Exception as e:
+                print(e)
+                dic["msg"] = 3  #信息修改失败
+    return JsonResponse(dic)
+
+@require_http_methods(["GET"])
+#获取职业经历
+def get_jobexp(request):
+    dic = {}
+    if(request.method=="GET"):
+        dic["msg"] = 1
+        #获取Cookie
+        uid = request.get_signed_cookie('is_logged',salt=salt,default=None)
+        if uid is None:
+            dic["msg"] = 2  #Cookie失效
+        else:
+            try:
+                user = USER.objects.get(id=uid)
+                if user.identity != "1":
+                    dic["msg"] = 4  #身份不符
+                else:
+                    job_exps = user.jobexperience_set.all()
+                    job_arr = []
+                    for job in job_exps:
+                        # print(json.dumps(model_to_dict(job)))
+                        job_arr.append(model_to_dict(job))
+                    # print(json.dumps(job_arr))
+                    dic["jobs"]=job_arr
+            except Exception as e:
+                print(e)
+                dic["msg"] = 3  #获取失败
+    return JsonResponse(dic)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+#添加深造经历
+def add_eduexp(request):
+    dic = {}
+    if(request.method=="POST"):
+        req = request.POST
+        dic["msg"] = 1
+        #获取Cookie
+        uid = request.get_signed_cookie('is_logged',salt=salt,default=None)
+        if uid is None:
+            dic["msg"] = 2  #Cookie失效
+        else:
+            try:
+                user = USER.objects.get(id=uid)
+                if user.identity != "1":
+                    dic["msg"] = 4  #身份不符
+                else:
+                    eduexp = EduExperience(user=user)
+                    eduexp.update(req)
+            except Exception as e:
+                print(e)
+                dic["msg"] = 3  #添加失败
+    return JsonResponse(dic)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+#删除深造经历
+def del_eduexp(request):
+    dic = {}
+    if(request.method=="POST"):
+        req = request.POST
+        dic["msg"] = 1
+        #获取Cookie
+        uid = request.get_signed_cookie('is_logged',salt=salt,default=None)
+        if uid is None:
+            dic["msg"] = 2  #Cookie失效
+        else:
+            try:
+                user = USER.objects.get(id=uid)
+                if user.identity != "1":
+                    dic["msg"] = 4  #身份不符
+                else:
+                    edu_exp =  EduExperience.objects.get(id=req["id"])
+                    edu_exp.delete()
+            except Exception as e:
+                print(e)
+                dic["msg"] = 3  #删除失败
+    return JsonResponse(dic)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+#更新深造经历
+def update_eduexp(request):
+    dic = {}
+    if(request.method=="POST"):
+        req = request.POST
+        dic["msg"] = 1
+        #获取Cookie
+        uid = request.get_signed_cookie('is_logged',salt=salt,default=None)
+        if uid is None:
+            dic["msg"] = 2  #Cookie失效
+        else:
+            try:
+                user = USER.objects.get(id=uid)
+                if user.identity != "1":
+                    dic["msg"] = 4      #身份不符
+                else:
+                    edu_exp =  EduExperience.objects.get(id=req["id"])
+                    req = req.dict()
+                    del req["id"]   #去掉id
+                    edu_exp.update(req)
+            except Exception as e:
+                print(e)
+                dic["msg"] = 3  #信息修改失败
+    return JsonResponse(dic)
+
+
+@require_http_methods(["GET"])
+#获取深造经历
+def get_eduexp(request):
+    dic = {}
+    if(request.method=="GET"):
+        dic["msg"] = 1
+        #获取Cookie
+        uid = request.get_signed_cookie('is_logged',salt=salt,default=None)
+        if uid is None:
+            dic["msg"] = 2  #Cookie失效
+        else:
+            try:
+                user = USER.objects.get(id=uid)
+                if user.identity != "1":
+                    dic["msg"] = 4  #身份不符
+                else:
+                    edu_exps = user.eduexperience_set.all()
+                    edu_arr = []
+                    for edu in edu_exps:
+                        # print(json.dumps(model_to_dict(job)))
+                        edu_arr.append(model_to_dict(edu))
+                    # print(json.dumps(job_arr))
+                    dic["edus"]=edu_arr
+            except Exception as e:
+                print(e)
+                dic["msg"] = 3  #获取失败
     return JsonResponse(dic)
 
 @csrf_exempt

@@ -79,12 +79,12 @@ class EduExperience(models.Model):
     country = models.CharField("国家",max_length=20,null=True)
     edu_degree = models.CharField("教育学历",max_length=20,null=True)
     class Meta:
-        verbose_name = '教育经历'
+        verbose_name = '深造经历'
         verbose_name_plural = verbose_name
     def __str__(self):
         return "{}".format(self.user)
     def get_absolute_url(self):
-        return reverse('教育经历', args=[self.user.id])
+        return reverse('深造经历', args=[self.user.id])
 
     # 更新
     def update(self, dic):
