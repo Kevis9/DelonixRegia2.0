@@ -3,7 +3,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
-
+from user.models import USER
 
 
 class SecondHandTrade(models.Model):
@@ -12,7 +12,7 @@ class SecondHandTrade(models.Model):
         ("S","出售")
     )
     #帖子的id是django自己加的一个AutoField
-    user=models.ForeignKey(User,on_delete=models.CASCADE,null=True)
+    user=models.ForeignKey(USER,on_delete=models.CASCADE,null=True)
     title=models.CharField("标题",max_length=50,null=True,blank=True)
     content=models.CharField("帖子内容",max_length=300,null=True,blank=True)
     itemtype=models.CharField("帖子类型",max_length=20,choices=ITEM_TYPE,null=True)
@@ -42,11 +42,11 @@ class Picture(models.Model):
         return reverse('lostandfimg', args=[self.post.id])
 
 class Comment(models.Model):
-    user=models.ForeignKey(User,on_delete=models.CASCADE,null=True,related_name="二手交易发送者")
+    user=models.ForeignKey(USER,on_delete=models.CASCADE,null=True,related_name="二手交易发送者")
     content = models.CharField("帖子内容", max_length=300, null=True, blank=True)
     #评论是针对哪个帖子的
     to_which_post=models.ForeignKey(SecondHandTrade,on_delete=models.CASCADE,null=True,blank=True)
-    to_which_user=models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True,related_name="二手交易接受者")
+    to_which_user=models.ForeignKey(USER,on_delete=models.CASCADE,null=True,blank=True,related_name="二手交易接受者")
     created_time=models.DateTimeField(auto_now_add=True,null=True)
     class Meta:
         verbose_name = '失物招领的评论'

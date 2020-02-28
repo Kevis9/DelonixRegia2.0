@@ -2,17 +2,18 @@
 #coding=utf-8
 from django.urls import path
 from . import views
-
 urlpatterns=[
     #保证这个应用里面的都是接口，是给前端提供数据的接口
     #注册
-    path('register/',views.register),
+    path('register',views.register),
     #验证邮箱
     path('active/',views.active),
     #登陆
-    path('login/',views.log_in),
+    path('login',views.log_in),
+    #检查登录Cookie -- 防止重复登录 实现自动登录
+    path('check_log',views.check_log),
     #登出
-    path('logout/',views.log_out),
+    path('logout',views.log_out),
     #更改密码
     path('changepas/',views.changepas),
     #找回密码
@@ -20,9 +21,25 @@ urlpatterns=[
     #验证并重置密码
     path('verifyandsetpas/',views.verifyandsetpas),
     #获取个人信息
-    path('get_profile/', views.get_profile, name='get_profile'),
+    path('get_profile', views.get_profile, name='get_profile'),
     #更新个人信息
-    path('update_profile/', views.update_profile, name='update_profile'),
+    path('update_profile', views.update_profile, name='update_profile'),
+    #添加职业经历
+    path('add_jobexp',views.add_jobexp),
+    #删除职业经历
+    path('del_jobexp',views.del_jobexp),
+    #更新职业经历
+    path('update_jobexp',views.update_jobexp),
+    #查看职业经历
+    path('get_jobexp',views.get_jobexp),
+    #添加深造经历
+    path('add_eduexp',views.add_eduexp),
+    #删除深造经历
+    path('del_eduexp',views.del_eduexp),
+    #更新深造经历
+    path('update_eduexp',views.update_eduexp),
+    #获取深造经历
+    path('get_eduexp',views.get_eduexp),
     #函数验证的函数
     path('verify/',views.active,name='verify'),
     # 关注某人
@@ -34,7 +51,7 @@ urlpatterns=[
     # 展示关注我的人
     path('myfans/',views.showmyfans,name='showmyfans'),
     # 搜索用户
-    path('searchuser/', views.searchuser, name='serachuser'),
+    # path('searchuser/', views.searchuser, name='serachuser'),
     # 展示我的消息
     path('mymsgs/',views.showmymessage,name='showmymessage'),
     # 上传简历
@@ -59,7 +76,13 @@ urlpatterns=[
     #查看方向
     path('ShowJobField',views.ShowJobField,name='ShowJobField'),
     #查看薪水
-    path('showsalary',views.showsalary,name="showsalary")
+    path('showsalary',views.showsalary,name="showsalary"),
+
+    #发送验证码
+    path('send_random_str',views.send_random_str,name="send_random_str"),
+    #验证验证码
+    path('verify_random_str',views.verify_random_str,name="verify_random_str")
 
 ]
+
 

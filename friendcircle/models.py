@@ -3,6 +3,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
+from user.models import USER
 
 '''
 朋友圈
@@ -11,7 +12,7 @@ from django.urls import reverse
 class FriendPost(models.Model):
     # objects = models.Manager()
     title = models.CharField("标题",max_length=254,null=False)  # 标题
-    user = models.ForeignKey(User, related_name='myposts', verbose_name='创建人', on_delete=models.CASCADE,null=False)
+    user = models.ForeignKey(USER, related_name='myposts', verbose_name='创建人', on_delete=models.CASCADE,null=False)
     content = models.TextField(max_length=4000, verbose_name='帖子内容',null=False)
     created_time = models.DateTimeField(auto_now_add=True,null=False)
     like_count = models.BigIntegerField("点赞数", null=True, default=0)
@@ -33,8 +34,8 @@ class Comment(models.Model):
     # 父帖
     post = models.ForeignKey(FriendPost, on_delete=models.CASCADE, null=False,verbose_name="父帖",related_name="postcomments")
     # 父评论
-    to_which_user = models.ForeignKey(User,on_delete=models.DO_NOTHING,verbose_name="回复的人",related_name="responsecomment",null=False)
-    user= models.ForeignKey(User,related_name='mycomments', verbose_name='创建人', on_delete=models.CASCADE,null=False)
+    to_which_user = models.ForeignKey(USER,on_delete=models.DO_NOTHING,verbose_name="回复的人",related_name="responsecomment",null=False)
+    user= models.ForeignKey(USER,related_name='mycomments', verbose_name='创建人', on_delete=models.CASCADE,null=False)
     #auto_now_add 自动更新为创建时的时间,以后都不能再更改
     #auto_now 自动更新为最后一次修改的时间，不能手动修改
     created_time = models.DateTimeField(auto_now_add=True, null=True, verbose_name='创建时间')
