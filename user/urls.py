@@ -23,7 +23,7 @@ urlpatterns=[
     #获取个人信息
     path('get_profile', views.get_profile, name='get_profile'),
     #更新个人信息
-    path('update_profile/', views.update_profile, name='update_profile'),
+    path('update_profile', views.update_profile, name='update_profile'),
     #函数验证的函数
     path('verify/',views.active,name='verify'),
     # 关注某人

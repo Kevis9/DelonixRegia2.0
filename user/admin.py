@@ -6,7 +6,7 @@ from .models import JobExperience,\
     User_Profile_Graduate,\
     User_Profile_Stu,\
     User_Profile_Company,\
-    EducationExperience,\
+    EduExperience,\
     Friends,Message,Company_Resume,Graduate_Resume,User_Admin,USER
 
 
@@ -31,7 +31,7 @@ admin.site.register(JobExperience)
 admin.site.register(User_Profile_Graduate)
 admin.site.register(User_Profile_Stu)
 admin.site.register(User_Profile_Company)
-admin.site.register(EducationExperience)
+admin.site.register(EduExperience)
 admin.site.register(Friends)
 admin.site.register(Message)
 admin.site.register(Company_Resume)

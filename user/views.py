@@ -6,7 +6,7 @@ from django.http import JsonResponse,HttpResponse
 from .models import User_Profile_Stu,\
     User_Profile_Graduate,\
     User_Profile_Company,JobExperience,\
-    EducationExperience,Friends,Message,Company_Resume,\
+    EduExperience,Friends,Message,Company_Resume,\
     Graduate_Resume,User_Admin,USER
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token ,rotate_token
@@ -283,121 +283,57 @@ def get_profile(request):
     uid = request.get_signed_cookie('is_logged',salt='wobuzhidaoyongshenmejiamisuanfabijiaohaozLPQ',default=None)
     dic = {}
     dic["msg"] = 1
-    # 根据用户的身份返回不同的信息
-    user = USER.objects.get(id=uid)
-    try:
-        if (user.identity == "1"):
-            profile = User_Profile_Graduate.objects.get(user=uid)
-            dic = model_to_dict(profile)
-        if (user.identity == "3"):
-            profile = User_Profile_Company.objects.get(user=uid)
-            dic = model_to_dict(profile)
-        if (user.identity == "4"):
-            profile = User_Admin.objects.get(user=uid)
-            dic = model_to_dict(profile)
-    except Exception as e:
-        dic["msg"] = 2
-        print(e)
+    if uid is None:
+        dic["msg"] = 3
+    else:
+        # 根据用户的身份返回不同的信息
+        user = USER.objects.get(id=uid)
+        try:
+            if (user.identity == "1"):
+                profile = User_Profile_Graduate.objects.get(user=uid)
+                dic = model_to_dict(profile)
+            if (user.identity == "3"):
+                profile = User_Profile_Company.objects.get(user=uid)
+                dic = model_to_dict(profile)
+            if (user.identity == "4"):
+                profile = User_Admin.objects.get(user=uid)
+                dic = model_to_dict(profile)
+        except Exception as e:
+            dic["msg"] = 2
+            print(e)
     return JsonResponse(dic)
 
 @csrf_exempt
+@require_http_methods(["POST"])
 #更新个人信息
 def update_profile(request):
-    response = {}
+    dic = {}
     if(request.method=="POST"):
-        response["msg"] = "true"
-        sessionid=json.loads(request.body).get("sessionid",None)
-        dic=cache.get(sessionid)
-        req=json.loads(request.body)
-        #cache过期
-        if dic is None:
-            return JsonResponse({"msg":"expire"})
-        username=dic["username"]
-        is_login=dic["is_login"]
-        identity = req.get("identity", None)
-        # username = request.session.get("username", None)
-        # is_login = request.session.get("is_login", False)
-        # identity = json.loads(request.body).get("identity", None)
-        #block代表不同的区域
-        block=req["block"]
-        USER = USER.objects.get(username=username)
-        if is_login:
-            #毕业生
-            if identity == '1':
-                try:
-                    USERprofile = User_Profile_Graduate.objects.get(USER=USER)
-                    if block=="0":
-                        # USERprofile.update(**req)
-                        USERprofile.name=req["name"]
-                        USERprofile.gender = req["gender"]
-                        #头像
-                        USERprofile.imgurl=req["imgurl"]
-                    if block=="1":
-                        # 因为字典的内容和model可能对不上，故不用此函数
-                        # USERprofile.update(**req)
-                        USERprofile.age = req["age"]
-                        USERprofile.birth_data = req["birth_date"]
-                        USERprofile.major = req["major"]
-                        USERprofile.education_backgroud = req["education_backgroud"]
-                        USERprofile.university = req["university"]
-                        USERprofile.living_city = req["living_city"]
-                        USERprofile.living_provice=req["living_provice"]
-                        USERprofile.email = req["email"]
-                        USERprofile.phonenumber = req["phonenum"]
-                        USERprofile.school_period_start = req["admission_date"]
-                        USERprofile.school_period_end = req["graduate_date"]
-                    if block=="2":
-                        if req["add"]=="1":
-                            education_e = EducationExperience(USER=USER)
-                            education_e.update(**req)
-                            education_e.major = req["major"]
-                            education_e.school = req["school"]
-                            education_e.startime = req["startime"]
-                            education_e.endtime = req["endtime"]
-                            education_e.educationbackground = req["educationbackground"]
-                            education_e.save()
-                        else:
-                            education_e=EducationExperience.objects.get(id=req["edu_id"])
-                            education_e.delete()
-                    if block=="3":
-                        if req["add"]=="1":
-                            jobe = JobExperience(USER=USER)
-                            # jobe.update(**req)
-                            jobe.job_place = req["job_place"]
-                            jobe.job = req["job"]
-                            jobe.job_period_start = req["job_period_start"]
-                            jobe.job_period_end = req["job_period_end"]
-                            jobe.job_salary = req["job_salary"]
-                            jobe.job_city = req["job_city"]
-                            jobe.job_province = req["job_province"]
-                            jobe.save()
-                        #删除工作经历
-                        else:
-                            jobe=JobExperience.objects.get(id=req["job_id"])
-                            jobe.delete()
-                    if block=="4":
-                        USERprofile.self_judement = req["self_judement"]
-                        USERprofile.self_sign = req["self_sign"]
-                    USERprofile.save()
-                except Exception as e:
-                    response["msg"]="false"
-                return JsonResponse(response)
-            #企业
-            if identity == '3':
-                try:
-                    USERprofile = User_Profile_Company.objects.get(USER=USER)
-                    USERprofile.phonenumber=req["phonenum"]
-                    USERprofile.name=req["name"]
-                    USERprofile.email=req["email"]
-                    # 头像
-                    USERprofile.imgurl=req["imgurl"]
-                    USERprofile.save()
-                    response["msg"]="true"
-                except Exception as e:
-                    response['msg']=e
-                return JsonResponse(response)
-    get_token(request)
-    return JsonResponse(response)
+        req = request.POST
+        dic["msg"] = 1
+        #获取Cookie
+        uid = request.get_signed_cookie('is_logged',salt='wobuzhidaoyongshenmejiamisuanfabijiaohaozLPQ',default=None)
+        if uid is None:
+            dic["msg"] = 2  #Cookie失效
+        else:
+            user = USER.objects.get(id=uid)
+            try:
+                if user.identity == "1":
+                    #毕业生
+                    profile = User_Profile_Graduate.objects.get(user=uid)
+                    profile.update(req)
+                if user.identity == "3":
+                    #企业
+                    profile = User_Profile_Company.objects.get(user=uid)
+                    profile.update(req)
+                if user.identity == "4":
+                    #管理员
+                    profile = User_Admin.objects.get(user=uid)
+                    profile.update(req)
+            except Exception as e:
+                print(e)
+                dic["msg"] = 3  #信息修改失败
+    return JsonResponse(dic)
 
 @csrf_exempt
 #关注某人

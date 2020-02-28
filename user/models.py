@@ -39,16 +39,21 @@ class Message(models.Model):
         return reverse('工作经历', args=[self.msgfrom])
 
 #职业经历
+#就业表
 class JobExperience(models.Model):
+
     #user作为外键
-    user=models.ForeignKey(USER,verbose_name="用户",on_delete=models.CASCADE,related_name="myjobexp",null=True)
-    job_place = models.CharField("工作单位", max_length=128, null=True)
-    job = models.CharField("职业",max_length=128,null=True)
-    job_period_start=models.DateField("就职时间",null=True)
-    job_period_end=models.DateField("离职时间",null=True)
-    job_city = models.CharField("工作城市", max_length=128, null=True)
-    job_salary=models.CharField("年薪", max_length=128,null=True)
-    job_province=models.CharField("省份", max_length=128,null=True)
+    user=models.ForeignKey(USER,verbose_name="用户",on_delete=models.CASCADE,null=True)
+    company_name = models.CharField("企业名称", max_length=128, null=True)
+    job_name = models.CharField("职业名称",max_length=128,null=True)
+    employ_date = models.DateField("就职时间",null=True)
+    city = models.CharField("就业城市", max_length=128, null=True)
+    province = models.CharField("就业省份", max_length=128, null=True)
+    country = models.CharField("就业国家", max_length=128, null=True)
+    salary = models.IntegerField("年薪",null=True)
+    major_pro = models.SmallIntegerField('专业是否对口',null=True)   #1代表对口, 0代表不对口
+    istop500 = models.SmallIntegerField('公司是否为500强',null=True)  #1代表是,0代表不是
+
     class Meta:
         verbose_name = '工作经历'
         verbose_name_plural = verbose_name
@@ -56,6 +61,38 @@ class JobExperience(models.Model):
         return "{}".format(self.user)
     def get_absolute_url(self):
         return reverse('工作经历', args=[self.user.id])
+
+    # 更新
+    def update(self, dic):
+        objlist = dir(self)
+        for key in dic:
+            if key in objlist:
+                setattr(self, key, dic[key])
+        self.save()
+
+#深造经历
+class EduExperience(models.Model):
+    user=models.ForeignKey(USER, verbose_name="用户", on_delete=models.CASCADE,null=True)
+    admission_date=models.DateField("深造时间",null=True)
+    uvty_name = models.CharField("学校名称",max_length=20,null=True)
+    major=models.CharField("专业",max_length=20,null=True)
+    country = models.CharField("国家",max_length=20,null=True)
+    edu_degree = models.CharField("教育学历",max_length=20,null=True)
+    class Meta:
+        verbose_name = '教育经历'
+        verbose_name_plural = verbose_name
+    def __str__(self):
+        return "{}".format(self.user)
+    def get_absolute_url(self):
+        return reverse('教育经历', args=[self.user.id])
+
+    # 更新
+    def update(self, dic):
+        objlist = dir(self)
+        for key in dic:
+            if key in objlist:
+                setattr(self, key, dic[key])
+        self.save()
 
 #好友列表
 #可以认为这个Friend是一个friendship,相当于一条有向线,改为关注
@@ -72,21 +109,6 @@ class Friends(models.Model):
     def get_absolute_url(self):
         return reverse('关注对象表', args=[self.user.id])
 
-
-class EducationExperience(models.Model):
-    user=models.ForeignKey(USER, verbose_name="用户教育经历", on_delete=models.CASCADE, related_name="myeducationexp",null=True)
-    startime=models.DateField("教育开始时间",null=True)
-    endtime = models.DateField("教育结束时间", null=True)
-    school=models.CharField("学校",max_length=128,null=True)
-    major=models.CharField("专业",max_length=128,null=True)
-    educationbackground=models.CharField("教育背景",max_length=128,null=True)
-    class Meta:
-        verbose_name = '教育经历'
-        verbose_name_plural = verbose_name
-    def __str__(self):
-        return "{}".format(self.user)
-    def get_absolute_url(self):
-        return reverse('教育经历', args=[self.user.id])
 
 
 #毕业生
@@ -131,6 +153,13 @@ class User_Profile_Graduate(models.Model):
     def get_absolute_url(self):
         return reverse('get_profile_graduate', args=[self.user.id])
         #但是推荐用上面的
+    #更新
+    def update(self,dic):
+        objlist = dir(self)
+        for key in dic:
+            if key in objlist:
+                setattr(self,key,dic[key])
+        self.save()
 
 
 #在校生
@@ -171,19 +200,40 @@ class User_Profile_Stu(models.Model):
     def get_absolute_url(self):
         return reverse('get_profile_stu', args=[self.user.id])
 
+    # 更新
+    def update(self, dic):
+        objlist = dir(self)
+        for key in dic:
+            if key in objlist:
+                setattr(self, key, dic[key])
+        self.save()
 #企业
 class User_Profile_Company(models.Model):
     user = models.OneToOneField(USER, on_delete=models.CASCADE)
     imgurl = models.CharField("头像url", max_length=1000, null=True)
-    identity = models.CharField("用户身份", max_length=128, choices=user_identity, default='3')
-    phonenumber = models.CharField('电话号码', max_length=128, null=True)
-    name = models.CharField('公司名', max_length=128, null=True)
+    identity = models.CharField("用户身份", max_length=20, choices=user_identity, default='3')
+    phonenum = models.CharField('电话号码', max_length=20, null=True)
+    name = models.CharField('公司名', max_length=60, null=True)
+    country = models.CharField('国家', max_length=30, null=True)
+    province = models.CharField('省份', max_length=30, null=True)
+    city = models.CharField('城市', max_length=30, null=True)
+    person_incharge_name = models.CharField('负责人名称', max_length=20, null=True)
+    intro = models.CharField('公司简介', max_length=300, null=True)
     email = models.EmailField("邮件", max_length=128, null=True)
+
     class Meta:
         verbose_name = '企业信息'
         verbose_name_plural = verbose_name
     def __str__(self):
         return "{}".format(self.user)
+
+    # 更新
+    def update(self, dic):
+        objlist = dir(self)
+        for key in dic:
+            if key in objlist:
+                setattr(self, key, dic[key])
+        self.save()
 
 #管理员信息
 class User_Admin(models.Model):
@@ -197,6 +247,13 @@ class User_Admin(models.Model):
         return "{}".format(self.name)
     def get_absolute_url(self):
         return reverse('用户', args=[self.id])
+    # 更新
+    def update(self, dic):
+        objlist = dir(self)
+        for key in dic:
+            if key in objlist:
+                setattr(self, key, dic[key])
+        self.save()
 
 #毕业生个人的简历
 class Graduate_Resume(models.Model):
