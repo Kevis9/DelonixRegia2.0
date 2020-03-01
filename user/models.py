@@ -42,17 +42,43 @@ class Message(models.Model):
 #就业表
 class JobExperience(models.Model):
 
+    #企业类型
+    COM_TYPE = (
+        ('1','各类企业'),
+        ('2','机关事业单位')
+    )
+
+    #就业行业
+    FIELD_TYPE = (
+        ('1','教育'),
+        ('2','租赁和商务服务业'),
+        ('3','制造业'),
+        ('4','信息传输,软件和信息技术服务业')
+    )
+
+    #职业类型
+    JOB_TYPE = (
+        ('1','专业技术人员'),
+        ('2','商业和服务业'),
+        ('3','办事人员和有关人员'),
+        ('4','不便分类')
+    )
+
     #user作为外键
-    user=models.ForeignKey(USER,verbose_name="用户",on_delete=models.CASCADE,null=True)
-    company_name = models.CharField("企业名称", max_length=128, null=True)
+    user = models.ForeignKey(USER,verbose_name="用户",on_delete=models.CASCADE,null=True)
+    company_name = models.CharField("工作单位名称", max_length=128, null=True)
     job_name = models.CharField("职业名称",max_length=128,null=True)
     employ_date = models.DateField("就职时间",null=True)
     city = models.CharField("就业城市", max_length=128, null=True)
     province = models.CharField("就业省份", max_length=128, null=True)
     country = models.CharField("就业国家", max_length=128, null=True)
-    salary = models.IntegerField("年薪",null=True)
+    salary = models.IntegerField("月薪",null=True)
     major_pro = models.SmallIntegerField('专业是否对口',null=True)   #1代表对口, 0代表不对口
     istop500 = models.SmallIntegerField('公司是否为500强',null=True)  #1代表是,0代表不是
+
+    com_type = models.CharField('企业类型',max_length=30,choices=COM_TYPE,null=True)
+    field_type = models.CharField('就业行业',max_length=30,choices=FIELD_TYPE,null=True)
+    job_type = models.CharField('职业类型',max_length=30,choices=FIELD_TYPE,null=True)
 
     class Meta:
         verbose_name = '工作经历'
@@ -76,8 +102,9 @@ class EduExperience(models.Model):
     admission_date=models.DateField("深造时间",null=True)
     uvty_name = models.CharField("学校名称",max_length=20,null=True)
     major=models.CharField("专业",max_length=20,null=True)
-    country = models.CharField("国家",max_length=20,null=True)
+    country = models.CharField("国家或地区",max_length=20,null=True)
     edu_degree = models.CharField("教育学历",max_length=20,null=True)
+
     class Meta:
         verbose_name = '深造经历'
         verbose_name_plural = verbose_name
@@ -116,9 +143,9 @@ class User_Profile_Graduate(models.Model):
     #user作为主键
     user = models.OneToOneField(USER,on_delete=models.CASCADE,primary_key=True)
     education_backgroud_choices=(
-        ('U','本科生'),
-        ('M','硕士'),
-        ('P','博士'),
+        ('1','本科'),
+        ('2','硕士'),
+        ('3','博士'),
     )
     #基本信息
     identity=models.CharField("用户身份",max_length=128,choices=user_identity,default='1')
@@ -129,7 +156,7 @@ class User_Profile_Graduate(models.Model):
     major = models.CharField("专业", max_length=128,null=True)
     email = models.EmailField("邮件",max_length=128,null=True)
     birth_date=models.DateField("出生日期", null=True)
-    # education_background=models.CharField("学历",max_length=128,choices=education_backgroud_choices,null=True)
+    edu_degree = models.CharField("学历",max_length=20,choices=education_backgroud_choices,null=True,default="1")
     # university=models.CharField("所在学校", max_length=128,null=True)
     #对于城市这一块要搞一个城市的选择器
     # living_city = models.CharField("居住城市", max_length=128,null=True)
@@ -295,3 +322,5 @@ def create_profile(sender,**kwargs):
     if g_name == "3":
         profile = User_Profile_Company(user=user)
         profile.save()
+
+
