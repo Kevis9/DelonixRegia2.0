@@ -77,11 +77,15 @@ urlpatterns=[
     path('ShowJobField',views.ShowJobField,name='ShowJobField'),
     #查看薪水
     path('showsalary',views.showsalary,name="showsalary"),
-
     #发送验证码
     path('send_random_str',views.send_random_str,name="send_random_str"),
     #验证验证码
-    path('verify_random_str',views.verify_random_str,name="verify_random_str")
+    path('verify_random_str',views.verify_random_str,name="verify_random_str"),
+    #毕业生统计信息
+    path('statistic_info',views.statistic_info),
+    #随机生成毕业生信息
+    path('ran',views.rand_create)
+
 
 ]
 
