@@ -1430,7 +1430,7 @@ def rand_create(request):
 
     #随机信息
     try:
-        for i in range(3000):
+        for i in range(1000):
             dic = {}
             dic["name"] = first_name[random.randint(0, len(first_name) - 1)] + last_name[
                 random.randint(0, len(last_name) - 1)]
